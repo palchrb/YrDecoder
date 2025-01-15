@@ -10,7 +10,7 @@ function decodeMessage(encodedMessage) {
         console.log("Entries to decode:", entries);
 
         return entries.map((entry) => {
-            if (entry.length < 7 || entry.length > 9) {
+            if (entry.length < 10 || entry.length > 11) {
                 throw new Error(`Invalid entry length for: ${entry}`);
             }
 
@@ -24,14 +24,16 @@ function decodeMessage(encodedMessage) {
             const gustSpeed = parseInt(entry.slice(tempSign === -1 ? 5 : 4, tempSign === -1 ? 7 : 6), 36);
 
             const cloudCover = parseInt(entry[tempSign === -1 ? 7 : 6], 10) * 10;
-            const windDirection = entry.slice(tempSign === -1 ? 8 : 7);
+            const precipitation = parseInt(entry.slice(tempSign === -1 ? 8 : 7, tempSign === -1 ? 10 : 9), 36);
+            const windDirection = entry.slice(tempSign === -1 ? 10 : 9);
 
             return {
                 time: `${time}:00`,
                 temp,
+                precip: `${precipitation} mm`,
                 wind: `${windSpeed} (${gustSpeed})`,
-                cloud: `${cloudCover}%`,
                 direction: windDirection,
+                cloud: `${cloudCover}%`,
             };
         });
     } catch (error) {
@@ -39,6 +41,7 @@ function decodeMessage(encodedMessage) {
         throw new Error("Failed to decode the message. Please check the input.");
     }
 }
+
 
 document.getElementById("decodeButton").addEventListener("click", () => {
     const part1 = document.getElementById("encodedMessage").value.trim();
