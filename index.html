@@ -1,154 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Værdekoder</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      background-color: #f7f7f7;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Weather Decoder">
+    <title>Weather Decoder</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+        }
 
-    h1 {
-      font-size: 20px;
-      margin: 10px 0;
-    }
+        h1 {
+            color: #333;
+        }
 
-    #input-container {
-      margin: 20px;
-      text-align: center;
-    }
+        textarea {
+            width: 90%;
+            max-width: 600px;
+            height: 100px;
+            margin: 10px 0;
+            font-size: 16px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
 
-    textarea {
-      width: 90%;
-      height: 100px;
-      font-size: 14px;
-      padding: 10px;
-      margin-bottom: 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
+        button {
+            font-size: 16px;
+            padding: 10px 20px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
 
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      color: white;
-      background-color: #007BFF;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
+        button:hover {
+            background-color: #0056b3;
+        }
 
-    button:hover {
-      background-color: #0056b3;
-    }
+        table {
+            width: 90%;
+            max-width: 600px;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
 
-    #weather-table {
-      width: 95%;
-      margin: 20px 0;
-      border-collapse: collapse;
-      overflow-x: auto;
-      white-space: nowrap;
-    }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
 
-    table {
-      width: 100%;
-    }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
 
-    th, td {
-      padding: 8px 12px;
-      text-align: center;
-      border: 1px solid #ddd;
-      font-size: 14px;
-    }
-
-    th {
-      background-color: #007BFF;
-      color: white;
-      position: sticky;
-      top: 0;
-    }
-
-    tr:nth-child(even) {
-      background-color: #f9f9f9;
-    }
-
-    tr:nth-child(odd) {
-      background-color: #ffffff;
-    }
-  </style>
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+    </style>
 </head>
 <body>
-  <h1>Værdekoder</h1>
-  <div id="input-container">
-    <textarea id="message1" placeholder="Lim inn første del av meldingen her"></textarea>
-    <textarea id="message2" placeholder="Lim inn andre del av meldingen her"></textarea>
-    <button onclick="decodeWeather()">Dekode</button>
-  </div>
-  <table id="weather-table">
-    <thead>
-      <tr>
-        <th>Tid</th>
-        <th>Temp</th>
-        <th>Nedbør</th>
-        <th>Vind (kast)</th>
-        <th>Skydekke</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-
-  <script>
-    function decodeWeather() {
-      const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
-      const base36ToInt = (value) => parseInt(value, 36);
-      const parseMessage = (message) => {
-        return message.split(";").map((segment) => {
-          const time = parseInt(segment[0], 36); // Første tegn er tid
-          const temp = parseInt(segment.slice(1, 3)); // To tegn for temperatur
-          const wind = base36ToInt(segment[3]); // Vindstyrke
-          const gust = base36ToInt(segment[4]); // Vindkast
-          const cloud = parseInt(segment[5]); // Skydekke
-          const precip = parseInt(segment[6]); // Nedbør
-          const direction = segment.slice(7); // Vindretning (2 tegn)
-
-          return { time, temp, wind, gust, cloud, precip, direction };
-        });
-      };
-
-      // Hent meldinger fra inputfelt
-      const message1 = document.getElementById("message1").value.trim();
-      const message2 = document.getElementById("message2").value.trim();
-
-      // Kombiner og dekod meldingen
-      const combinedMessage = `${message1};${message2}`;
-      const weatherData = parseMessage(combinedMessage);
-
-      // Oppdater tabellen
-      const tbody = document.querySelector("#weather-table tbody");
-      tbody.innerHTML = ""; // Tøm eksisterende innhold
-
-      weatherData.forEach((data) => {
-        const row = `
-          <tr>
-            <td>${data.time}:00</td>
-            <td>${data.temp}°C</td>
-            <td>${data.precip} mm</td>
-            <td>${data.wind} (${data.gust}) m/s ${data.direction}</td>
-            <td>${data.cloud * 10}%</td>
-          </tr>
-        `;
-        tbody.innerHTML += row;
-      });
-    }
-  </script>
+    <h1>Weather Decoder</h1>
+    <p>Paste the encoded weather message below:</p>
+    <textarea id="encodedMessage" placeholder="Enter the first part of the message..."></textarea>
+    <textarea id="encodedMessagePart2" placeholder="Enter the second part of the message (if applicable)..."></textarea>
+    <button id="decodeButton">Decode</button>
+    <table id="weatherTable">
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Temp (°C)</th>
+                <th>Precip (mm)</th>
+                <th>Wind (Gust) m/s</th>
+                <th>Direction</th>
+                <th>Cloud (%)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Decoded weather data will appear here -->
+        </tbody>
+    </table>
+    <script src="script.js"></script>
 </body>
 </html>
