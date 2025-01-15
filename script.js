@@ -26,10 +26,10 @@ function decodeMessage(encodedMessage) {
 
             return {
                 time: `${time}:00`,
-                temp,
-                wind: `${windSpeed} (${gustSpeed})`,
+                temp: `${temp}°C`,
+                wind: `${windSpeed} (${gustSpeed}) m/s`,
                 cloud: `${cloudCover}%`,
-                direction: windDirection,
+                direction: windDirection || "N/A",
             };
         });
     } catch (error) {
@@ -42,7 +42,8 @@ document.getElementById("decodeButton").addEventListener("click", () => {
     const part1 = document.getElementById("encodedMessage").value.trim();
     const part2 = document.getElementById("encodedMessagePart2").value.trim();
 
-    const fullMessage = `${part1}${part2 ? ';' + part2 : ''}`;
+    // Ensure both parts are combined correctly
+    const fullMessage = [part1, part2].filter(Boolean).join(';');
     console.log("Full message to decode:", fullMessage);
 
     try {
