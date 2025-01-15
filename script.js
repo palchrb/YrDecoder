@@ -4,9 +4,11 @@ function decodeMessage(encodedMessage) {
             throw new Error("No message provided");
         }
 
+        // Split the message into entries
         const entries = encodedMessage.split(';').filter(Boolean);
         console.log("Entries to decode:", entries);
 
+        // Decode each entry
         return entries.map((entry) => {
             const entryLength = entry.length;
             console.log(`Decoding entry: ${entry} (length: ${entryLength})`);
@@ -46,8 +48,8 @@ document.getElementById("decodeButton").addEventListener("click", () => {
     const part1 = document.getElementById("encodedMessage").value.trim();
     const part2 = document.getElementById("encodedMessagePart2").value.trim();
 
-    // Combine parts and ensure proper formatting
-    const fullMessage = [part1, part2].filter(Boolean).join(';');
+    // Directly combine the two pasted messages
+    const fullMessage = `${part1}${part2}`;
     console.log("Full message to decode:", fullMessage);
 
     try {
