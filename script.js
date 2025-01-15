@@ -1,4 +1,4 @@
-// Oppdatert dekoder for det nye formatet
+// Oppdatert dekoder for det nye komprimerte formatet
 function decodeMessage(encodedMessage) {
     try {
         if (!encodedMessage || encodedMessage.trim() === "") {
@@ -12,15 +12,8 @@ function decodeMessage(encodedMessage) {
 
         const base36ToInt = (value) => parseInt(value, 36);
 
-        // Første verdi er datoen
-        const dateCode = entries.shift();
-        const year = Math.floor(base36ToInt(dateCode) / 10000) + 2000;
-        const month = Math.floor((base36ToInt(dateCode) % 10000) / 100);
-        const day = base36ToInt(dateCode) % 100;
-        const decodedDate = `${day.toString().padStart(2, "0")}.${month.toString().padStart(2, "0")}.${year}`;
-
-        const weatherData = entries.map((entry) => {
-            if (entry.length !== 9) {
+        return entries.map((entry) => {
+            if (entry.length !== 10) {
                 throw new Error(`Invalid entry length for: ${entry}`);
             }
 
@@ -37,7 +30,7 @@ function decodeMessage(encodedMessage) {
             const gust = base36ToInt(gustBase36);
 
             const cloudBase36 = entry.slice(6, 7);
-            const cloud = base36ToInt(cloudBase36) * 5; // Justert til 5%-intervaller
+            const cloud = base36ToInt(cloudBase36) * 10;
 
             const precipBase36 = entry.slice(7, 8);
             const precip = base36ToInt(precipBase36);
@@ -49,13 +42,12 @@ function decodeMessage(encodedMessage) {
                 time: `${time}:00`,
                 temp: `${temp}°C`,
                 precip: `${precip} mm`,
-                wind: `${wind} m/s (${gust} m/s)`,
+                wind: `${wind} m/s`,
+                gust: `${gust} m/s`,
                 direction: direction,
                 cloud: `${cloud}%`,
             };
         });
-
-        return { date: decodedDate, data: weatherData };
     } catch (error) {
         console.error("Error decoding message:", error);
         throw new Error("Failed to decode the message. Please check the input.");
@@ -71,16 +63,12 @@ document.getElementById("decodeButton").addEventListener("click", () => {
     console.log("Full message to decode:", fullMessage);
 
     try {
-        const decoded = decodeMessage(fullMessage);
+        const decodedData = decodeMessage(fullMessage);
 
-        // Oppdater dato i tabellen
-        document.getElementById("weatherDate").textContent = `Dato: ${decoded.date}`;
-
-        // Oppdater værdata i tabellen
         const tableBody = document.getElementById("weatherTable").querySelector("tbody");
         tableBody.innerHTML = "";
 
-        decoded.data.forEach((data) => {
+        decodedData.forEach((data) => {
             const row = document.createElement("tr");
 
             Object.values(data).forEach((value) => {
