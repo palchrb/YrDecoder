@@ -1,67 +1,54 @@
-function decodeWeatherMessage(encodedMessage) {
-  const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+// script.js
 
-  // Funksjon for å dekode Base36 verdier
-  const decodeBase36 = (value) => parseInt(value, 36);
+document.getElementById('decodeButton').addEventListener('click', () => {
+  const messageInput1 = document.getElementById('messageInput1').value;
+  const messageInput2 = document.getElementById('messageInput2').value;
+  const rawMessage = messageInput1 + messageInput2;
 
-  // Splitter meldingen inn i timer (separert med ";")
-  const hours = encodedMessage.split(";");
+  const weatherData = decodeMessage(rawMessage);
+  displayWeatherData(weatherData);
+});
 
-  return hours.map((hourData, index) => {
-    if (hourData.length < 10) {
-      return {
-        time: `${index}:00`,
-        temp: "N/A",
-        precip: "N/A",
-        wind: "N/A",
-        gust: "N/A",
-        cloud: "N/A",
-        direction: "N/A",
-      };
-    }
+function decodeMessage(message) {
+  const hours = message.split(';');
+  const decodedData = [];
 
-    try {
-      const time = decodeBase36(hourData.slice(0, 1)); // Tid
-      const temp = parseInt(hourData.slice(1, 3)); // Temperatur (-99 til +99)
-      const wind = decodeBase36(hourData.slice(3, 5)); // Vindstyrke (m/s)
-      const gust = decodeBase36(hourData.slice(5, 7)); // Vindkast (m/s)
-      const cloud = parseInt(hourData.slice(7, 8)) * 10; // Skydekke (%)
-      const precip = parseInt(hourData.slice(8, 9)); // Nedbør (mm)
-      const direction = directions.find((_, i) => i === decodeBase36(hourData.slice(9))); // Vindretning
+  hours.forEach(hour => {
+    if (hour.length < 10) return; // Skip invalid entries
 
-      // Hvis dataen ikke er komplett eller gyldig, returner tomme verdier
-      if (isNaN(temp) || isNaN(wind) || isNaN(gust) || isNaN(cloud) || isNaN(precip) || !direction) {
-        return {
-          time: `${time}:00`,
-          temp: "N/A",
-          precip: "N/A",
-          wind: "N/A",
-          gust: "N/A",
-          cloud: "N/A",
-          direction: "N/A",
-        };
-      }
+    const time = parseInt(hour[0], 36).toString().padStart(2, '0') + ':00';
+    const temp = parseInt(hour.slice(1, 3), 36);
+    const wind = parseInt(hour[3], 36);
+    const gust = parseInt(hour[4], 36);
+    const cloud = parseInt(hour[5], 10) * 10; // Skydekke i prosent
+    const precip = parseInt(hour[6], 10); // Nedbør i mm
+    const dirIndex = hour.slice(7); // Vindretning som bokstavkode
 
-      return {
-        time: `${time}:00`,
-        temp: `${temp}°C`,
-        precip: `${precip} mm`,
-        wind: `${wind} m/s`,
-        gust: `(${gust}) m/s`,
-        cloud: `${cloud}%`,
-        direction: direction || "N/A",
-      };
-    } catch (error) {
-      console.error("Feil ved dekoding:", error);
-      return {
-        time: `${index}:00`,
-        temp: "N/A",
-        precip: "N/A",
-        wind: "N/A",
-        gust: "N/A",
-        cloud: "N/A",
-        direction: "N/A",
-      };
-    }
+    const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+    const windDirection = directions[parseInt(dirIndex, 36) % directions.length];
+
+    decodedData.push({ time, temp, precip, wind, gust, cloud, windDirection });
+  });
+
+  return decodedData;
+}
+
+function displayWeatherData(data) {
+  const tableBody = document.getElementById('weatherTable').querySelector('tbody');
+  tableBody.innerHTML = '';
+
+  data.forEach(row => {
+    const tr = document.createElement('tr');
+
+    tr.innerHTML = `
+      <td>${row.time}</td>
+      <td>${row.temp}&deg;C</td>
+      <td>${row.precip} mm</td>
+      <td>${row.wind} (${row.gust}) m/s</td>
+      <td>${row.cloud}%</td>
+      <td>${row.windDirection}</td>
+    `;
+
+    tableBody.appendChild(tr);
   });
 }
