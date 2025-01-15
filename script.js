@@ -4,38 +4,39 @@ function decodeMessage(encodedMessage) {
             throw new Error("No message provided");
         }
 
-        // Split the message into entries
+        // Split the full message into entries
         const entries = encodedMessage.split(';').filter(Boolean);
         console.log("Entries to decode:", entries);
 
-        // Decode each entry
         return entries.map((entry) => {
             const entryLength = entry.length;
             console.log(`Decoding entry: ${entry} (length: ${entryLength})`);
 
-            // Validate entry length
-            if (entryLength < 7 || entryLength > 10) {
+            // Ensure the entry has a valid length
+            if (entryLength < 9 || entryLength > 10) {
                 throw new Error(`Invalid entry length for: ${entry}`);
             }
 
-            const timeBase36 = entry[0];
-            const time = parseInt(timeBase36, 36);
+            const timeBase36 = entry[0]; // First character: time
+            const time = parseInt(timeBase36, 36); // Convert to base 10
 
-            const tempSign = entry[1] === '-' ? -1 : 1;
+            const tempSign = entry[1] === '-' ? -1 : 1; // Check if temperature is negative
             const temp = tempSign * parseInt(entry.slice(tempSign === -1 ? 2 : 1, tempSign === -1 ? 3 : 2), 10);
 
             const windSpeed = parseInt(entry.slice(tempSign === -1 ? 3 : 2, tempSign === -1 ? 5 : 4), 36);
             const gustSpeed = parseInt(entry.slice(tempSign === -1 ? 5 : 4, tempSign === -1 ? 7 : 6), 36);
 
-            const cloudCover = parseInt(entry[tempSign === -1 ? 7 : 6], 10) * 10;
-            const windDirection = entry.slice(tempSign === -1 ? 8 : 7);
+            const cloudCover = parseInt(entry[tempSign === -1 ? 7 : 6], 10) * 10; // Cloud cover in %
+            const precipitation = parseInt(entry[tempSign === -1 ? 8 : 7], 10); // Precipitation
+            const windDirection = entry.slice(tempSign === -1 ? 9 : 8); // Wind direction (last characters)
 
             return {
                 time: `${time}:00`,
                 temp: `${temp}°C`,
+                precip: `${precipitation} mm`,
                 wind: `${windSpeed} (${gustSpeed}) m/s`,
-                cloud: `${cloudCover}%`,
                 direction: windDirection || "N/A",
+                cloud: `${cloudCover}%`,
             };
         });
     } catch (error) {
@@ -48,7 +49,7 @@ document.getElementById("decodeButton").addEventListener("click", () => {
     const part1 = document.getElementById("encodedMessage").value.trim();
     const part2 = document.getElementById("encodedMessagePart2").value.trim();
 
-    // Directly combine the two pasted messages
+    // Combine the two parts of the message directly
     const fullMessage = `${part1}${part2}`;
     console.log("Full message to decode:", fullMessage);
 
