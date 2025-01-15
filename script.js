@@ -8,31 +8,44 @@ function decodeMessage(encodedMessage) {
         console.log("Entries to decode:", entries);
 
         return entries.map((entry) => {
-            // Valider minimum og maksimum lengde
-            if (entry.length < 8 || entry.length > 12) {
+            console.log(`Decoding entry: ${entry}`);
+            if (entry.length < 7 || entry.length > 9) {
                 throw new Error(`Invalid entry length for: ${entry}`);
             }
 
-            // Dekoder tid (base36 til desimal)
+            // Time decoding
             const timeBase36 = entry[0];
             const time = parseInt(timeBase36, 36);
+            console.log(`Time: ${time}:00`);
 
-            // Dekoder temperatur
-            const tempSign = entry[1] === '-' ? -1 : 1; // Minus eller pluss
+            // Temperature decoding
+            const tempSign = entry[1] === '-' ? -1 : 1;
             const tempEndIndex = tempSign === -1 ? 3 : 2;
-            const temp = tempSign * parseInt(entry.slice(1, tempEndIndex), 10);
+            const temp = tempSign * parseInt(entry.slice(tempSign === -1 ? 2 : 1, tempEndIndex), 10);
+            console.log(`Temperature: ${temp}°C`);
 
-            // Dekoder vindstyrke og vindkast (base36)
-            const windSpeed = parseInt(entry.slice(tempEndIndex, tempEndIndex + 2), 36);
-            const gustSpeed = parseInt(entry.slice(tempEndIndex + 2, tempEndIndex + 4), 36);
+            // Wind speed decoding
+            const windStart = tempEndIndex;
+            const windEnd = windStart + 2;
+            const windSpeed = parseInt(entry.slice(windStart, windEnd), 36);
+            console.log(`Wind speed: ${windSpeed}`);
 
-            // Dekoder skydekke
-            const cloudCover = parseInt(entry[tempEndIndex + 4], 10) * 10;
+            // Gust decoding
+            const gustStart = windEnd;
+            const gustEnd = gustStart + 2;
+            const gustSpeed = parseInt(entry.slice(gustStart, gustEnd), 36);
+            console.log(`Gust speed: ${gustSpeed}`);
 
-            // Dekoder vindretning
-            const windDirection = entry.slice(tempEndIndex + 5);
+            // Cloud cover decoding
+            const cloudStart = gustEnd;
+            const cloudCover = parseInt(entry[cloudStart], 10) * 10;
+            console.log(`Cloud cover: ${cloudCover}%`);
 
-            // Returner objekt for hver time
+            // Wind direction decoding
+            const directionStart = cloudStart + 1;
+            const windDirection = entry.slice(directionStart);
+            console.log(`Wind direction: ${windDirection}`);
+
             return {
                 time: `${time}:00`,
                 temp: `${temp}°C`,
@@ -43,7 +56,7 @@ function decodeMessage(encodedMessage) {
         });
     } catch (error) {
         console.error("Error decoding message:", error);
-        throw new Error("Failed to decode the message. Please check the input format.");
+        throw new Error("Failed to decode the message. Please check the input.");
     }
 }
 
