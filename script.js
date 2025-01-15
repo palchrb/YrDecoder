@@ -9,11 +9,24 @@ function decodeMessage(encodedMessage) {
         console.log("Entries to decode:", entries);
 
         const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
-
         const base36ToInt = (value) => parseInt(value, 36);
 
-        return entries.map((entry) => {
-            if (entry.length !== 10) {
+        // Hent og dekod datoen fra den første delen av meldingen
+        const dateCode = entries.shift(); // Fjern datoen fra entries
+        if (dateCode.length !== 4) {
+            throw new Error(`Invalid date code length: ${dateCode}`);
+        }
+
+        const year = Math.floor(base36ToInt(dateCode) / 10000) + 2000;
+        const month = Math.floor((base36ToInt(dateCode) % 10000) / 100);
+        const day = base36ToInt(dateCode) % 100;
+
+        const decodedDate = `${day.toString().padStart(2, "0")}.${month.toString().padStart(2, "0")}.${year}`;
+        console.log("Decoded date:", decodedDate);
+
+        // Dekod time-for-time værdata
+        const weatherData = entries.map((entry) => {
+            if (entry.length !== 9) {
                 throw new Error(`Invalid entry length for: ${entry}`);
             }
 
@@ -48,6 +61,8 @@ function decodeMessage(encodedMessage) {
                 cloud: `${cloud}%`,
             };
         });
+
+        return { date: decodedDate, data: weatherData };
     } catch (error) {
         console.error("Error decoding message:", error);
         throw new Error("Failed to decode the message. Please check the input.");
@@ -63,12 +78,21 @@ document.getElementById("decodeButton").addEventListener("click", () => {
     console.log("Full message to decode:", fullMessage);
 
     try {
-        const decodedData = decodeMessage(fullMessage);
+        const decoded = decodeMessage(fullMessage);
 
         const tableBody = document.getElementById("weatherTable").querySelector("tbody");
         tableBody.innerHTML = "";
 
-        decodedData.forEach((data) => {
+        // Legg til dato som overskrift
+        const dateRow = document.createElement("tr");
+        const dateCell = document.createElement("td");
+        dateCell.colSpan = 7;
+        dateCell.textContent = `Dato: ${decoded.date}`;
+        dateRow.appendChild(dateCell);
+        tableBody.appendChild(dateRow);
+
+        // Legg til værdata
+        decoded.data.forEach((data) => {
             const row = document.createElement("tr");
 
             Object.values(data).forEach((value) => {
