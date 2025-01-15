@@ -1,36 +1,90 @@
-function decodeWeather() {
+// Oppdatert dekodingslogikk for værmeldinger
+
+document.getElementById("decodeBtn").addEventListener("click", function () {
+  const part1 = document.getElementById("part1").value.trim();
+  const part2 = document.getElementById("part2").value.trim();
+  const fullMessage = part1 + part2;
+
+  const decodedData = decodeWeatherMessage(fullMessage);
+  if (decodedData) {
+    displayDecodedData(decodedData);
+  } else {
+    alert("Feil: Kunne ikke dekode meldingen. Sjekk formatet.");
+  }
+});
+
+function decodeWeatherMessage(message) {
   const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
-  const base36ToDecimal = (value) => parseInt(value, 36);
 
-  const part1 = document.getElementById("messagePart1").value.trim();
-  const part2 = document.getElementById("messagePart2").value.trim();
-  const fullMessage = part1 + ";" + part2;
+  try {
+    const hours = message.split(";").map(entry => {
+      const timeBase36 = entry[0];
+      const time = parseInt(timeBase36, 36);
+      const temp = parseInt(entry.slice(1, 3));
+      const wind = parseInt(entry.slice(3, 5), 36);
+      const gust = parseInt(entry.slice(5, 7), 36);
+      const cloud = parseInt(entry[7]) * 10;
+      const precip = parseInt(entry[8]);
+      const dirCode = entry.slice(9);
+      const direction = directions.find((_, idx) => idx === directions.indexOf(dirCode));
 
-  const rows = fullMessage.split(";").map((chunk) => {
-    const time = parseInt(chunk[0], 36); // Time in decimal
-    const temp = parseInt(chunk.slice(1, 3)); // Temperature
-    const wind = base36ToDecimal(chunk[3]); // Wind
-    const gust = base36ToDecimal(chunk[4]); // Gust
-    const cloud = parseInt(chunk[5]); // Cloud cover
-    const precip = parseInt(chunk[6]); // Precipitation
-    const dir = directions.find((_, index) => chunk.endsWith(directions[index]));
+      return {
+        time,
+        temp,
+        wind,
+        gust,
+        cloud,
+        precip,
+        direction,
+      };
+    });
 
-    return { time, temp, wind, gust, cloud, precip, dir };
+    return hours;
+  } catch (error) {
+    console.error("Dekodingsfeil:", error);
+    return null;
+  }
+}
+
+function displayDecodedData(data) {
+  const table = document.getElementById("decodedTable");
+
+  // Tøm tidligere data
+  table.innerHTML = "";
+
+  // Legg til header
+  const headerRow = document.createElement("tr");
+  ["Tid", "Temp", "Nedbør", "Vind (kast)", "Skydekke"].forEach(header => {
+    const th = document.createElement("th");
+    th.textContent = header;
+    headerRow.appendChild(th);
   });
+  table.appendChild(headerRow);
 
-  // Render data in the table
-  const tableBody = document.getElementById("decodedTable").querySelector("tbody");
-  tableBody.innerHTML = ""; // Clear previous results
+  // Legg til rader for data
+  data.forEach(entry => {
+    const row = document.createElement("tr");
 
-  rows.forEach((row) => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${row.time}:00</td>
-      <td>${row.temp}°C</td>
-      <td>${row.precip} mm</td>
-      <td>${row.wind} m/s (${row.gust} m/s)</td>
-      <td>${row.cloud * 10}%</td>
-    `;
-    tableBody.appendChild(tr);
+    const timeCell = document.createElement("td");
+    timeCell.textContent = `${entry.time}:00`;
+    row.appendChild(timeCell);
+
+    const tempCell = document.createElement("td");
+    tempCell.textContent = `${entry.temp}°C`;
+    row.appendChild(tempCell);
+
+    const precipCell = document.createElement("td");
+    precipCell.textContent = `${entry.precip} mm`;
+    row.appendChild(precipCell);
+
+    const windCell = document.createElement("td");
+    windCell.textContent = `${entry.wind} (${entry.gust}) m/s ${entry.direction || ""}`;
+    row.appendChild(windCell);
+
+    const cloudCell = document.createElement("td");
+    cloudCell.textContent = `${entry.cloud}%`;
+    row.appendChild(cloudCell);
+
+    table.appendChild(row);
   });
 }
