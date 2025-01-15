@@ -4,7 +4,7 @@ function decodeMessage(encodedMessage) {
             throw new Error("No message provided");
         }
 
-        const entries = encodedMessage.split(";").filter(Boolean);
+        const entries = encodedMessage.split(';').filter(Boolean);
         console.log("Entries to decode:", entries);
 
         return entries.map((entry) => {
@@ -12,13 +12,20 @@ function decodeMessage(encodedMessage) {
                 throw new Error(`Invalid entry length for: ${entry}`);
             }
 
-            const time = parseInt(entry.slice(0, 2), 36);
-            const temp = parseInt(entry.slice(2, 5), 10);
-            const windSpeed = parseInt(entry.slice(5, 7), 36);
-            const gustSpeed = parseInt(entry.slice(7, 9), 36);
-            const cloudCover = parseInt(entry[9]) * 10;
-            const precipitation = parseInt(entry.slice(10, 12), 10);
-            const windDirection = entry.slice(12).trim();
+            const timeBase36 = entry.slice(0, 2);
+            const time = parseInt(timeBase36, 36);
+
+            const tempSign = entry[2] === 'X' ? -1 : 1;
+            const tempBase36 = entry.slice(3, 4);
+            const temp = tempSign * parseInt(tempBase36, 36);
+
+            const windSpeed = parseInt(entry.slice(4, 6), 36);
+            const gustSpeed = parseInt(entry.slice(6, 8), 36);
+
+            const cloudCover = parseInt(entry[8], 10) * 10;
+            const precipitation = parseInt(entry[9], 36);
+
+            const windDirection = entry.slice(10);
 
             return {
                 time: `${time}:00`,
@@ -26,7 +33,7 @@ function decodeMessage(encodedMessage) {
                 precip: `${precipitation} mm`,
                 wind: `${windSpeed} (${gustSpeed}) m/s`,
                 direction: windDirection,
-                cloud: `${cloudCover}%`,
+                cloud: `${cloudCover}%`
             };
         });
     } catch (error) {
