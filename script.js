@@ -1,38 +1,42 @@
-// Fullstendig oppdatert script.js for bedre dekoding og feilhåndtering
-
 function decodeMessage(encodedMessage) {
     try {
         if (!encodedMessage || encodedMessage.trim() === "") {
-            throw new Error("No message provided.");
+            throw new Error("No message provided");
         }
 
-        const entries = encodedMessage.split(';').filter(Boolean);
+        const entries = encodedMessage.split(';').filter(Boolean); // Splitt meldingen på semikolon
         console.log("Entries to decode:", entries);
 
         return entries.map((entry) => {
-            if (entry.length < 8 || entry.length > 10) {
+            // Valider lengden på hver komponent
+            if (entry.length < 9 || entry.length > 12) {
                 throw new Error(`Invalid entry length for: ${entry}`);
             }
 
+            // Dekoder tidspunkt (base36 til desimal)
             const timeBase36 = entry[0];
             const time = parseInt(timeBase36, 36);
 
-            // Extract and parse temperature
-            const tempSign = entry[1] === '-' ? -1 : 1;
+            // Dekoder temperatur
+            const tempSign = entry[1] === '-' ? -1 : 1; // Håndter minusgrader
             const tempEndIndex = tempSign === -1 ? 3 : 2;
             const temp = tempSign * parseInt(entry.slice(tempSign === -1 ? 2 : 1, tempEndIndex), 10);
 
-            // Extract and parse wind speed and gust
-            const windSpeed = parseInt(entry.slice(tempEndIndex, tempEndIndex + 2), 36);
-            const gustSpeed = parseInt(entry.slice(tempEndIndex + 2, tempEndIndex + 4), 36);
+            // Dekoder vindstyrke og vindkast
+            const windStartIndex = tempEndIndex;
+            const windSpeed = parseInt(entry.slice(windStartIndex, windStartIndex + 2), 36);
+            const gustSpeed = parseInt(entry.slice(windStartIndex + 2, windStartIndex + 4), 36);
 
-            // Extract cloud cover and precipitation
-            const cloudCover = parseInt(entry[tempEndIndex + 4], 10) * 10;
-            const precipitation = parseInt(entry[tempEndIndex + 5], 10);
+            // Dekoder skydekke
+            const cloudCover = parseInt(entry[windStartIndex + 4], 10) * 10;
 
-            // Extract wind direction
-            const windDirection = entry.slice(tempEndIndex + 6);
+            // Dekoder nedbør
+            const precipitation = parseInt(entry[windStartIndex + 5], 10);
 
+            // Dekoder vindretning
+            const windDirection = entry.slice(windStartIndex + 6);
+
+            // Returner et objekt for hver time
             return {
                 time: `${time}:00`,
                 temp: `${temp}°C`,
@@ -48,6 +52,7 @@ function decodeMessage(encodedMessage) {
     }
 }
 
+// Eventlistener for knappen
 document.getElementById("decodeButton").addEventListener("click", () => {
     const part1 = document.getElementById("encodedMessage").value.trim();
     const part2 = document.getElementById("encodedMessagePart2").value.trim();
