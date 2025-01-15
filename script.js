@@ -8,52 +8,26 @@ function decodeMessage(encodedMessage) {
         console.log("Entries to decode:", entries);
 
         return entries.map((entry) => {
-            console.log(`Decoding entry: ${entry}`);
-
-            // Validate entry length
-            if (entry.length < 7) {
+            if (entry.length < 7 || entry.length > 9) {
                 throw new Error(`Invalid entry length for: ${entry}`);
             }
 
-            // Decode time
             const timeBase36 = entry[0];
             const time = parseInt(timeBase36, 36);
-            if (isNaN(time)) throw new Error(`Invalid time value in entry: ${entry}`);
 
-            // Decode temperature
             const tempSign = entry[1] === '-' ? -1 : 1;
-            const tempEndIndex = tempSign === -1 ? 3 : 2;
-            const temp = tempSign * parseInt(entry.slice(tempSign === -1 ? 2 : 1, tempEndIndex), 10);
-            if (isNaN(temp)) throw new Error(`Invalid temperature value in entry: ${entry}`);
+            const temp = tempSign * parseInt(entry.slice(tempSign === -1 ? 2 : 1, tempSign === -1 ? 3 : 2), 10);
 
-            // Decode wind speed
-            const windStart = tempEndIndex;
-            const windEnd = windStart + 2;
-            const windSpeed = parseInt(entry.slice(windStart, windEnd), 36);
-            if (isNaN(windSpeed)) throw new Error(`Invalid wind speed value in entry: ${entry}`);
+            const windSpeed = parseInt(entry.slice(tempSign === -1 ? 3 : 2, tempSign === -1 ? 5 : 4), 36);
+            const gustSpeed = parseInt(entry.slice(tempSign === -1 ? 5 : 4, tempSign === -1 ? 7 : 6), 36);
 
-            // Decode gust speed
-            const gustStart = windEnd;
-            const gustEnd = gustStart + 2;
-            const gustSpeed = parseInt(entry.slice(gustStart, gustEnd), 36);
-            if (isNaN(gustSpeed)) throw new Error(`Invalid gust speed value in entry: ${entry}`);
-
-            // Decode cloud cover
-            const cloudStart = gustEnd;
-            const cloudCover = parseInt(entry[cloudStart], 10) * 10;
-            if (isNaN(cloudCover)) throw new Error(`Invalid cloud cover value in entry: ${entry}`);
-
-            // Decode wind direction
-            const directionStart = cloudStart + 1;
-            const windDirection = entry.slice(directionStart);
-            if (!windDirection) throw new Error(`Invalid wind direction value in entry: ${entry}`);
-
-            console.log(`Decoded: time=${time}, temp=${temp}, wind=${windSpeed}, gust=${gustSpeed}, cloud=${cloudCover}, dir=${windDirection}`);
+            const cloudCover = parseInt(entry[tempSign === -1 ? 7 : 6], 10) * 10;
+            const windDirection = entry.slice(tempSign === -1 ? 8 : 7);
 
             return {
                 time: `${time}:00`,
-                temp: `${temp}°C`,
-                wind: `${windSpeed} (${gustSpeed}) m/s`,
+                temp,
+                wind: `${windSpeed} (${gustSpeed})`,
                 cloud: `${cloudCover}%`,
                 direction: windDirection,
             };
@@ -68,7 +42,7 @@ document.getElementById("decodeButton").addEventListener("click", () => {
     const part1 = document.getElementById("encodedMessage").value.trim();
     const part2 = document.getElementById("encodedMessagePart2").value.trim();
 
-    const fullMessage = `${part1};${part2}`;
+    const fullMessage = `${part1}${part2 ? ';' + part2 : ''}`;
     console.log("Full message to decode:", fullMessage);
 
     try {
