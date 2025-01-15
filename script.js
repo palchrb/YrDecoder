@@ -1,5 +1,3 @@
-// script.js
-
 document.addEventListener("DOMContentLoaded", () => {
     const encodedMessage = document.getElementById("encodedMessage");
     const encodedMessagePart2 = document.getElementById("encodedMessagePart2");
@@ -47,14 +45,14 @@ function decodeWeatherMessage(encodedMessage) {
     const segments = encodedMessage.split(";");
 
     segments.forEach((segment) => {
-        if (segment.length === 10) {
+        if (segment.length === 9) {
             const time = parseInt(segment.substring(0, 1), 36) + ":00";
-            const temp = parseInt(segment.substring(1, 3), 36) - 50;
-            const precip = parseInt(segment.substring(3, 4), 36);
-            const wind = parseInt(segment.substring(4, 6), 36);
-            const gust = parseInt(segment.substring(6, 8), 36);
-            const cloud = parseInt(segment.substring(8, 9), 36) * 10;
-            const direction = directions[parseInt(segment.substring(9), 10) % 8];
+            const temp = parseInt(segment.substring(1, 3), 36) - 50; // Temp offset
+            const precip = parseInt(segment.substring(3, 4), 36); // Precipitation in mm
+            const wind = parseInt(segment.substring(4, 6), 36); // Wind in m/s
+            const gust = parseInt(segment.substring(6, 8), 36); // Gust in m/s
+            const cloud = parseInt(segment.substring(8, 9), 36) * 10; // Cloud cover in %
+            const direction = directions[parseInt(segment[9], 10) % 8] || "N"; // Wind direction
 
             decodedData.push({
                 time,
