@@ -1,4 +1,4 @@
-// Oppdatert dekoder for det nye komprimerte formatet
+// Updated decoder for the new compressed format
 function decodeMessage(encodedMessage) {
     try {
         if (!encodedMessage || encodedMessage.trim() === "") {
@@ -12,7 +12,14 @@ function decodeMessage(encodedMessage) {
 
         const base36ToInt = (value) => parseInt(value, 36);
 
-        return entries.map((entry) => {
+        // First entry is the date
+        const dateCode = entries.shift();
+        const year = Math.floor(base36ToInt(dateCode) / 10000) + 2000;
+        const month = Math.floor((base36ToInt(dateCode) % 10000) / 100);
+        const day = base36ToInt(dateCode) % 100;
+        const decodedDate = `${day.toString().padStart(2, "0")}.${month.toString().padStart(2, "0")}.${year}`;
+
+        const weatherData = entries.map((entry) => {
             if (entry.length !== 10) {
                 throw new Error(`Invalid entry length for: ${entry}`);
             }
@@ -30,24 +37,25 @@ function decodeMessage(encodedMessage) {
             const gust = base36ToInt(gustBase36);
 
             const cloudBase36 = entry.slice(6, 7);
-            const cloud = base36ToInt(cloudBase36) * 10;
+            const cloud = base36ToInt(cloudBase36) * 5; // Adjusted to 5% intervals
 
-            const precipBase36 = entry.slice(7, 8);
-            const precip = base36ToInt(precipBase36);
+            const precipBase36 = entry.slice(7, 9); // Two-character precipitation encoding
+            const precip = base36ToInt(precipBase36) / 10; // Adjusted to include one decimal point
 
-            const directionBase36 = entry.slice(8, 9);
+            const directionBase36 = entry.slice(9, 10);
             const direction = directions[base36ToInt(directionBase36) % 8];
 
             return {
                 time: `${time}:00`,
                 temp: `${temp}°C`,
-                precip: `${precip} mm`,
-                wind: `${wind} m/s`,
-                gust: `${gust} m/s`,
+                precip: `${precip.toFixed(1)} mm`, // Precipitation with one decimal point
+                wind: `${wind} m/s (${gust} m/s)`,
                 direction: direction,
                 cloud: `${cloud}%`,
             };
         });
+
+        return { date: decodedDate, data: weatherData };
     } catch (error) {
         console.error("Error decoding message:", error);
         throw new Error("Failed to decode the message. Please check the input.");
@@ -63,12 +71,16 @@ document.getElementById("decodeButton").addEventListener("click", () => {
     console.log("Full message to decode:", fullMessage);
 
     try {
-        const decodedData = decodeMessage(fullMessage);
+        const decoded = decodeMessage(fullMessage);
 
+        // Update date in the table
+        document.getElementById("weatherDate").textContent = `Dato: ${decoded.date}`;
+
+        // Update weather data in the table
         const tableBody = document.getElementById("weatherTable").querySelector("tbody");
         tableBody.innerHTML = "";
 
-        decodedData.forEach((data) => {
+        decoded.data.forEach((data) => {
             const row = document.createElement("tr");
 
             Object.values(data).forEach((value) => {
