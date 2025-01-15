@@ -8,7 +8,11 @@ function decodeMessage(encodedMessage) {
         console.log("Entries to decode:", entries);
 
         return entries.map((entry) => {
-            if (entry.length < 7 || entry.length > 9) {
+            const entryLength = entry.length;
+            console.log(`Decoding entry: ${entry} (length: ${entryLength})`);
+
+            // Validate entry length
+            if (entryLength < 7 || entryLength > 10) {
                 throw new Error(`Invalid entry length for: ${entry}`);
             }
 
@@ -42,7 +46,7 @@ document.getElementById("decodeButton").addEventListener("click", () => {
     const part1 = document.getElementById("encodedMessage").value.trim();
     const part2 = document.getElementById("encodedMessagePart2").value.trim();
 
-    // Ensure both parts are combined correctly
+    // Combine parts and ensure proper formatting
     const fullMessage = [part1, part2].filter(Boolean).join(';');
     console.log("Full message to decode:", fullMessage);
 
