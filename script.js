@@ -1,70 +1,77 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const encodedMessage = document.getElementById("encodedMessage");
-    const encodedMessagePart2 = document.getElementById("encodedMessagePart2");
-    const decodeButton = document.getElementById("decodeButton");
-    const weatherTableBody = document.getElementById("weatherTable").querySelector("tbody");
+// Decode the weather message and render it in a table
+function decodeMessage(encodedMessage) {
+    try {
+        const entries = encodedMessage.split(";").filter(entry => entry.trim() !== "");
+        const data = entries.map(entry => {
+            const time = parseInt(entry[0], 36); // TT (Base36 to hour)
+            const temp = parseInt(entry.slice(1, 3), 36) - 50; // Temp in °C (-50 to allow for negative temperatures)
+            const wind = parseInt(entry[3], 36); // WW (Base36 to wind speed)
+            const gust = parseInt(entry[4], 36); // GG (Base36 to wind gust)
+            const cloud = parseInt(entry[5], 10) * 10; // CC (Cloud cover percentage)
+            const precip = parseInt(entry[6], 10); // P (Precipitation in mm)
+            const direction = entry.slice(7); // DD (Direction, e.g., N, NE, E, etc.)
 
-    decodeButton.addEventListener("click", () => {
-        const part1 = encodedMessage.value.trim();
-        const part2 = encodedMessagePart2.value.trim();
-        const fullMessage = part1 + part2;
+            if (isNaN(time) || isNaN(temp) || isNaN(wind) || isNaN(gust) || isNaN(cloud) || isNaN(precip)) {
+                console.error("Failed to parse entry:", entry);
+                throw new Error("Invalid message format");
+            }
 
-        // Clear existing rows in the table
-        weatherTableBody.innerHTML = "";
-
-        if (fullMessage.length === 0) {
-            alert("Please paste a valid encoded message.");
-            return;
-        }
-
-        const decodedData = decodeWeatherMessage(fullMessage);
-        if (!decodedData || decodedData.length === 0) {
-            alert("Failed to decode the message. Please check the input.");
-            return;
-        }
-
-        decodedData.forEach((entry) => {
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                <td>${entry.time}</td>
-                <td>${entry.temp}</td>
-                <td>${entry.precip}</td>
-                <td>${entry.wind} (${entry.gust})</td>
-                <td>${entry.direction}</td>
-                <td>${entry.cloud}</td>
-            `;
-            weatherTableBody.appendChild(row);
+            return { time, temp, wind, gust, cloud, precip, direction };
         });
-    });
-});
-
-function decodeWeatherMessage(encodedMessage) {
-    const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
-    const decodedData = [];
-
-    const segments = encodedMessage.split(";");
-
-    segments.forEach((segment) => {
-        if (segment.length === 9) {
-            const time = parseInt(segment.substring(0, 1), 36) + ":00";
-            const temp = parseInt(segment.substring(1, 3), 36) - 50; // Temp offset
-            const precip = parseInt(segment.substring(3, 4), 36); // Precipitation in mm
-            const wind = parseInt(segment.substring(4, 6), 36); // Wind in m/s
-            const gust = parseInt(segment.substring(6, 8), 36); // Gust in m/s
-            const cloud = parseInt(segment.substring(8, 9), 36) * 10; // Cloud cover in %
-            const direction = directions[parseInt(segment[9], 10) % 8] || "N"; // Wind direction
-
-            decodedData.push({
-                time,
-                temp,
-                precip,
-                wind,
-                gust,
-                cloud,
-                direction,
-            });
-        }
-    });
-
-    return decodedData;
+        return data;
+    } catch (error) {
+        console.error("Error decoding message:", error);
+        return null;
+    }
 }
+
+function renderTable(data) {
+    const tableBody = document.querySelector("#weatherTable tbody");
+    tableBody.innerHTML = ""; // Clear existing rows
+
+    data.forEach(entry => {
+        const row = document.createElement("tr");
+
+        const timeCell = document.createElement("td");
+        timeCell.textContent = `${entry.time}:00`;
+        row.appendChild(timeCell);
+
+        const tempCell = document.createElement("td");
+        tempCell.textContent = `${entry.temp}°C`;
+        row.appendChild(tempCell);
+
+        const precipCell = document.createElement("td");
+        precipCell.textContent = `${entry.precip} mm`;
+        row.appendChild(precipCell);
+
+        const windCell = document.createElement("td");
+        windCell.textContent = `${entry.wind} (${entry.gust}) m/s`;
+        row.appendChild(windCell);
+
+        const directionCell = document.createElement("td");
+        directionCell.textContent = entry.direction;
+        row.appendChild(directionCell);
+
+        const cloudCell = document.createElement("td");
+        cloudCell.textContent = `${entry.cloud}%`;
+        row.appendChild(cloudCell);
+
+        tableBody.appendChild(row);
+    });
+}
+
+document.getElementById("decodeButton").addEventListener("click", () => {
+    const part1 = document.getElementById("encodedMessage").value.trim();
+    const part2 = document.getElementById("encodedMessagePart2").value.trim();
+    const fullMessage = part1 + ";" + part2;
+
+    console.log("Full message to decode:", fullMessage);
+
+    const decodedData = decodeMessage(fullMessage);
+    if (!decodedData) {
+        alert("Failed to decode the message. Please check the input.");
+        return;
+    }
+
+    renderTable(decodedData);
+});
