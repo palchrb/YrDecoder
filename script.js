@@ -1,3 +1,4 @@
+// Oppdatert dekoder for det nye formatet
 function decodeMessage(encodedMessage) {
     try {
         if (!encodedMessage || encodedMessage.trim() === "") {
@@ -8,9 +9,10 @@ function decodeMessage(encodedMessage) {
         console.log("Entries to decode:", entries);
 
         const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+
         const base36ToInt = (value) => parseInt(value, 36);
 
-        // Hent datoen fra den første delen
+        // Første verdi er datoen
         const dateCode = entries.shift();
         const year = Math.floor(base36ToInt(dateCode) / 10000) + 2000;
         const month = Math.floor((base36ToInt(dateCode) % 10000) / 100);
@@ -35,7 +37,7 @@ function decodeMessage(encodedMessage) {
             const gust = base36ToInt(gustBase36);
 
             const cloudBase36 = entry.slice(6, 7);
-            const cloud = base36ToInt(cloudBase36) * 5; // Juster skydekke til 5%-intervaller
+            const cloud = base36ToInt(cloudBase36) * 5; // Justert til 5%-intervaller
 
             const precipBase36 = entry.slice(7, 8);
             const precip = base36ToInt(precipBase36);
@@ -59,6 +61,8 @@ function decodeMessage(encodedMessage) {
         throw new Error("Failed to decode the message. Please check the input.");
     }
 }
+
+// Event listener for decode button
 document.getElementById("decodeButton").addEventListener("click", () => {
     const part1 = document.getElementById("encodedMessage").value.trim();
     const part2 = document.getElementById("encodedMessagePart2").value.trim();
@@ -69,22 +73,17 @@ document.getElementById("decodeButton").addEventListener("click", () => {
     try {
         const decoded = decodeMessage(fullMessage);
 
+        // Oppdater dato i tabellen
+        document.getElementById("weatherDate").textContent = `Dato: ${decoded.date}`;
+
+        // Oppdater værdata i tabellen
         const tableBody = document.getElementById("weatherTable").querySelector("tbody");
         tableBody.innerHTML = "";
 
-        // Legg til dato i tabellen
-        const dateRow = document.createElement("tr");
-        const dateCell = document.createElement("td");
-        dateCell.colSpan = 6;
-        dateCell.textContent = `Dato: ${decoded.date}`;
-        dateRow.appendChild(dateCell);
-        tableBody.appendChild(dateRow);
-
-        // Legg til værdata
         decoded.data.forEach((data) => {
             const row = document.createElement("tr");
 
-            Object.entries(data).forEach(([key, value]) => {
+            Object.values(data).forEach((value) => {
                 const cell = document.createElement("td");
                 cell.textContent = value;
                 row.appendChild(cell);
