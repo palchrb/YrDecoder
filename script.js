@@ -1,5 +1,3 @@
-// Fullstendig oppdatert script.js for bedre feilsøking og dekoding
-
 function decodeMessage(encodedMessage) {
     try {
         if (!encodedMessage || encodedMessage.trim() === "") {
@@ -10,7 +8,8 @@ function decodeMessage(encodedMessage) {
         console.log("Entries to decode:", entries);
 
         return entries.map((entry) => {
-            if (entry.length < 10 || entry.length > 11) {
+            // Format validation: TTWWGGCCPPDD (10 characters)
+            if (entry.length !== 10) {
                 throw new Error(`Invalid entry length for: ${entry}`);
             }
 
@@ -20,12 +19,12 @@ function decodeMessage(encodedMessage) {
             const tempSign = entry[1] === '-' ? -1 : 1;
             const temp = tempSign * parseInt(entry.slice(tempSign === -1 ? 2 : 1, tempSign === -1 ? 3 : 2), 10);
 
-            const windSpeed = parseInt(entry.slice(tempSign === -1 ? 3 : 2, tempSign === -1 ? 5 : 4), 36);
-            const gustSpeed = parseInt(entry.slice(tempSign === -1 ? 5 : 4, tempSign === -1 ? 7 : 6), 36);
+            const windSpeed = parseInt(entry.slice(2, 4), 36);
+            const gustSpeed = parseInt(entry.slice(4, 6), 36);
 
-            const cloudCover = parseInt(entry[tempSign === -1 ? 7 : 6], 10) * 10;
-            const precipitation = parseInt(entry.slice(tempSign === -1 ? 8 : 7, tempSign === -1 ? 10 : 9), 36);
-            const windDirection = entry.slice(tempSign === -1 ? 10 : 9);
+            const cloudCover = parseInt(entry[6], 10) * 10;
+            const precipitation = parseInt(entry.slice(7, 9), 36);
+            const windDirection = entry.slice(9);
 
             return {
                 time: `${time}:00`,
@@ -41,33 +40,3 @@ function decodeMessage(encodedMessage) {
         throw new Error("Failed to decode the message. Please check the input.");
     }
 }
-
-
-document.getElementById("decodeButton").addEventListener("click", () => {
-    const part1 = document.getElementById("encodedMessage").value.trim();
-    const part2 = document.getElementById("encodedMessagePart2").value.trim();
-
-    const fullMessage = `${part1};${part2}`;
-    console.log("Full message to decode:", fullMessage);
-
-    try {
-        const decodedData = decodeMessage(fullMessage);
-
-        const tableBody = document.getElementById("weatherTable").querySelector("tbody");
-        tableBody.innerHTML = "";
-
-        decodedData.forEach((data) => {
-            const row = document.createElement("tr");
-
-            Object.values(data).forEach((value) => {
-                const cell = document.createElement("td");
-                cell.textContent = value;
-                row.appendChild(cell);
-            });
-
-            tableBody.appendChild(row);
-        });
-    } catch (error) {
-        alert(error.message);
-    }
-});
