@@ -12,7 +12,11 @@ function decodeMessage(encodedMessage) {
 
         const base36ToInt = (value) => parseInt(value, 36);
 
-        // First entry is the date
+        // First entry is the city name (up to 15 characters, URL encoded)
+        const cityNameEncoded = entries.shift();
+        const cityName = decodeURIComponent(cityNameEncoded);
+
+        // Second entry is the date
         const dateCode = entries.shift();
         const year = Math.floor(base36ToInt(dateCode) / 10000) + 2000;
         const month = Math.floor((base36ToInt(dateCode) % 10000) / 100);
@@ -55,7 +59,7 @@ function decodeMessage(encodedMessage) {
             };
         });
 
-        return { date: decodedDate, data: weatherData };
+        return { cityName, date: decodedDate, data: weatherData };
     } catch (error) {
         console.error("Error decoding message:", error);
         throw new Error("Failed to decode the message. Please check the input.");
@@ -73,8 +77,8 @@ document.getElementById("decodeButton").addEventListener("click", () => {
     try {
         const decoded = decodeMessage(fullMessage);
 
-        // Update date in the table
-        document.getElementById("weatherDate").textContent = `Dato: ${decoded.date}`;
+        // Update city and date in the table
+        document.getElementById("weatherDate").textContent = `Sted: ${decoded.cityName}, Dato: ${decoded.date}`;
 
         // Update weather data in the table
         const tableBody = document.getElementById("weatherTable").querySelector("tbody");
