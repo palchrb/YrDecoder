@@ -52,7 +52,7 @@ function decodeMessage(encodedMessage) {
             return {
                 time: `${time}:00`,
                 temp: `${temp}°C`,
-                precip: `${precip.toFixed(1)} mm`, // Precipitation with one decimal point
+                precip: precip === 0 ? "" : `${precip.toFixed(1)} mm`, // Leave empty if precipitation is 0.0
                 wind: `${wind} m/s (${gust} m/s)`,
                 direction: direction,
                 cloud: `${cloud}%`,
