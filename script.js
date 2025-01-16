@@ -51,9 +51,9 @@ function decodeMessage(encodedMessage) {
 
             return {
                 time: `${time}:00`,
-                temp: `${temp}°C`,
-                precip: precip === 0 ? "" : `${precip.toFixed(1)} mm`, // Leave empty if precipitation is 0.0
-                wind: `${wind} m/s (${gust} m/s)`,
+                temp: `${temp}`,
+                precip: precip === 0 ? "" : `${precip.toFixed(1)}`, // Leave empty if precipitation is 0.0
+                wind: `${wind} (${gust})`,
                 direction: direction,
                 cloud: `${cloud}%`,
             };
