@@ -249,8 +249,8 @@ function generateDirectionGraphic(directions) {
 
     const angleStep = 360 / directionsMap.length;
     directionsMap.forEach((dir, index) => {
-        const startAngle = (angleStep * index - 67.5) * (Math.PI / 180); // Startvinkelen for sektoren
-        const endAngle = (angleStep * (index + 1) - 67.5) * (Math.PI / 180); // Sluttvinkelen for sektoren
+        const startAngle = (angleStep * index - 112.5) * (Math.PI / 180); // Startvinkelen for sektoren
+        const endAngle = (angleStep * (index + 1) - 112.5) * (Math.PI / 180); // Sluttvinkelen for sektoren
 
         const x1 = 50 + 48 * Math.cos(startAngle);
         const y1 = 50 + 48 * Math.sin(startAngle);
