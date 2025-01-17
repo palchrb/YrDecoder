@@ -249,20 +249,29 @@ function generateDirectionGraphic(directions) {
 
     const angleStep = 360 / directionsMap.length;
     directionsMap.forEach((dir, index) => {
-        const angle = (angleStep * index - 90) * (Math.PI / 180); // Juster vinkelen til 12:00-posisjon
-        const x1 = 50 + 48 * Math.cos(angle); // Ytre sirkelens punkt
-        const y1 = 50 + 48 * Math.sin(angle);
-        const x2 = 50 + 20 * Math.cos(angle); // Indre punkt for sektorer
-        const y2 = 50 + 20 * Math.sin(angle);
+        const startAngle = (angleStep * index - 90) * (Math.PI / 180); // Startvinkelen for sektoren
+        const endAngle = (angleStep * (index + 1) - 90) * (Math.PI / 180); // Sluttvinkelen for sektoren
 
-        // Fyll sektoren hvis den er markert
+        const x1 = 50 + 48 * Math.cos(startAngle);
+        const y1 = 50 + 48 * Math.sin(startAngle);
+        const x2 = 50 + 48 * Math.cos(endAngle);
+        const y2 = 50 + 48 * Math.sin(endAngle);
+
         const isHighlighted = highlightedDirections.includes(dir);
-        svg += `<path d="M50,50 L${x1},${y1} A48,48 0 0,1 ${x2},${y2} Z" fill="${isHighlighted ? "red" : "none"}" stroke="black" stroke-width="1"/>`;
+
+        // Tegn kakestykke
+        svg += `
+            <path d="M50,50 L${x1},${y1} A48,48 0 0,1 ${x2},${y2} Z" 
+                  fill="${isHighlighted ? "red" : "none"}" 
+                  stroke="black" 
+                  stroke-width="1"/>
+        `;
     });
 
     svg += `</svg>`;
     return svg;
 }
+
 
 // Oppdater event listener for skreddekoder
 document.getElementById("decodeAvalancheButton").addEventListener("click", () => {
