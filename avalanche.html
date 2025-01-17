@@ -17,7 +17,7 @@
             background-color: #f0f0f0;
         }
 
-        h1, h2, h3 {
+        h1 {
             color: #333;
         }
 
@@ -51,6 +51,7 @@
             max-width: 600px;
             border-collapse: collapse;
             margin: 20px 0;
+            overflow-x: auto;
         }
 
         th, td {
@@ -68,39 +69,32 @@
             background-color: #f2f2f2;
         }
 
-        nav {
-            margin-bottom: 20px;
-        }
+        /* Legg til scroll for små skjermer */
+        @media screen and (max-width: 600px) {
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
 
-        nav ul {
-            display: flex;
-            gap: 20px;
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        nav a {
-            text-decoration: none;
-            color: #007bff;
-            font-weight: bold;
-        }
-
-        nav a:hover {
-            color: #0056b3;
+            th, td {
+                padding: 6px;
+                font-size: 14px;
+            }
         }
     </style>
 </head>
 <body>
     <!-- Navigeringsmeny -->
     <nav>
-        <ul>
-            <li><a href="index.html">Værdekoder</a></li>
-            <li><a href="avalanche.html">Skreddekoder</a></li>
+        <ul style="display: flex; gap: 20px; list-style: none; padding: 0;">
+            <li><a href="index.html" id="weatherDecoderLink">Værdekoder</a></li>
+            <li><a href="avalanche.html" id="avalancheDecoderLink">Skreddekoder</a></li>
         </ul>
     </nav>
 
     <h1>Skreddekoder</h1>
+    <p>Lim inn kodet melding nedenfor:</p>
     <textarea id="encodedAvalancheMessage" placeholder="Lim inn kodet melding her"></textarea>
     <button id="decodeAvalancheButton">Dekod</button>
     <h2>Dekodet informasjon</h2>
@@ -119,7 +113,7 @@
             </tr>
         </thead>
         <tbody>
-            <!-- Dekodet informasjon vil vises her -->
+            <!-- Dekodet informasjon vises her -->
         </tbody>
     </table>
 
