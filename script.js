@@ -104,6 +104,7 @@ if (decodeButton) {
 }
 
 // Dekode skreddata
+// Funksjon for å dekode meldingen
 function decodeAvalancheMessage(encodedMessage) {
     try {
         if (!encodedMessage || encodedMessage.trim() === "") {
@@ -148,6 +149,95 @@ function decodeAvalancheMessage(encodedMessage) {
     }
 }
 
+// Funksjon for å dekode Base36-verdi
+function decodeBase36(value) {
+    return parseInt(value, 36);
+}
+
+// Funksjon for å dekode himmelretninger fra en streng som "11110000"
+function decodeDirections(base36String) {
+    if (!/^[0-9a-z]{1,2}$/.test(base36String)) {
+        console.error(`Ugyldig Base36-verdi for retninger: ${base36String}`);
+        return "Ukjent retning";
+    }
+
+    const binaryString = parseInt(base36String, 36).toString(2).padStart(8, "0");
+    const directionsMap = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+    return binaryString
+        .split("")
+        .map((bit, index) => (bit === "1" ? directionsMap[index] : null))
+        .filter(Boolean)
+        .join(", ");
+}
+
+// Dekodingsfunksjoner for skreddata
+function decodeAvalancheProblemType(code) {
+    const mapping = {
+        "0": "Ikke gitt",
+        "1": "Nysnø (løssnøskred)",
+        "2": "Våt snø (løssnøskred)",
+        "3": "Nysnø (flakskred)",
+        "4": "Fokksnø (flakskred)",
+        "5": "Vedvarende svakt lag (flakskred)",
+        "6": "Våt snø (flakskred)",
+        "7": "Glideskred"
+    };
+    return mapping[code] || "Ukjent skredtype";
+}
+
+function decodeAvalCause(code) {
+    const mapping = {
+        "0": "Ikke gitt",
+        "1": "Nedføyket svakt lag med nysnø",
+        "2": "Nedsnødd eller nedføyket overflaterim",
+        "3": "Nedsnødd eller nedføyket kantkornet snø",
+        "4": "Dårlig binding mellom glatt skare og overliggende snø",
+        "5": "Dårlig binding mellom lag i fokksnøen",
+        "6": "Kantkornet snø ved bakken",
+        "7": "Kantkornet snø over skarelag",
+        "8": "Kantkornet snø under skarelag",
+        "9": "Vann ved bakken/smelting fra bakken",
+        "a": "Opphopning av vann i/over lag i snødekket",
+        "b": "Ubunden snø"
+    };
+    return mapping[code] || "Ukjent årsak";
+}
+
+function decodeAvalPropagation(code) {
+    const mapping = {
+        "0": "Ikke gitt",
+        "1": "Få bratte heng",
+        "2": "Noen bratte heng",
+        "3": "Mange bratte heng"
+    };
+    return mapping[code] || "Ukjent spredning";
+}
+
+function decodeAvalTriggerSensitivity(code) {
+    const mapping = {
+        "0": "Ikke gitt",
+        "1": "Svært vanskelig å løse ut",
+        "2": "Vanskelig å løse ut",
+        "3": "Lett å løse ut",
+        "4": "Svært lett å løse ut",
+        "5": "Naturlig"
+    };
+    return mapping[code] || "Ukjent sensitivitet";
+}
+
+function decodeDestructiveSize(code) {
+    const mapping = {
+        "0": "Ikke gitt",
+        "1": "1 - Små",
+        "2": "2 - Middels",
+        "3": "3 - Store",
+        "4": "4 - Svært store",
+        "5": "5 - Ekstremt store",
+        "6": "Ukjent størrelse"
+    };
+    return mapping[code] || "Ukjent størrelse";
+}
+
 // Event listener for skreddekoder
 const decodeAvalancheButton = document.getElementById("decodeAvalancheButton");
 if (decodeAvalancheButton) {
@@ -180,3 +270,4 @@ if (decodeAvalancheButton) {
         }
     });
 }
+
