@@ -4,40 +4,124 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Skreddekoder</title>
-    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+        }
+
+        h1, h2, h3 {
+            color: #333;
+        }
+
+        textarea {
+            width: 90%;
+            max-width: 600px;
+            height: 100px;
+            margin: 10px 0;
+            font-size: 16px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            font-size: 16px;
+            padding: 10px 20px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        table {
+            width: 90%;
+            max-width: 600px;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        nav {
+            margin-bottom: 20px;
+        }
+
+        nav ul {
+            display: flex;
+            gap: 20px;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        nav a:hover {
+            color: #0056b3;
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <nav>
-            <a href="index.html">Værdekoder</a>
-            <a href="avalanche.html">Skreddekoder</a>
-        </nav>
-    </header>
+    <!-- Navigeringsmeny -->
+    <nav>
+        <ul>
+            <li><a href="index.html">Værdekoder</a></li>
+            <li><a href="avalanche.html">Skreddekoder</a></li>
+        </ul>
+    </nav>
 
-    <main>
-        <h1>Skreddekoder</h1>
-        <textarea id="encodedAvalancheMessage" placeholder="Lim inn kodet melding her"></textarea>
-        <button id="decodeAvalancheButton">Dekod</button>
-        <h2>Dekodet informasjon</h2>
-        <p id="dangerLevels"></p>
-        <h3>Skredproblemer</h3>
-        <table id="avalancheTable">
-            <thead>
-                <tr>
-                    <th>Type</th>
-                    <th>Årsak</th>
-                    <th>Spredning</th>
-                    <th>Sensitivitet</th>
-                    <th>Størrelse</th>
-                    <th>Høyde</th>
-                    <th>Retning</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Dekodet informasjon vil vises her -->
-            </tbody>
-        </table>
-    </main>
+    <h1>Skreddekoder</h1>
+    <textarea id="encodedAvalancheMessage" placeholder="Lim inn kodet melding her"></textarea>
+    <button id="decodeAvalancheButton">Dekod</button>
+    <h2>Dekodet informasjon</h2>
+    <p id="dangerLevels"></p>
+    <h3>Skredproblemer</h3>
+    <table id="avalancheTable">
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>Årsak</th>
+                <th>Spredning</th>
+                <th>Sensitivitet</th>
+                <th>Størrelse</th>
+                <th>Høyde</th>
+                <th>Retning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Dekodet informasjon vil vises her -->
+        </tbody>
+    </table>
 
     <script src="script.js"></script>
 </body>
