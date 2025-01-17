@@ -99,3 +99,79 @@ document.getElementById("decodeButton").addEventListener("click", () => {
         alert(error.message);
     }
 });
+
+// Dekode skreddata
+function decodeAvalancheMessage(encodedMessage) {
+    try {
+        if (!encodedMessage || encodedMessage.trim() === "") {
+            throw new Error("Ingen melding oppgitt.");
+        }
+
+        const dangerLevels = encodedMessage.slice(0, 3).split("").map(d => decodeBase36(d));
+        const avalancheProblems = [];
+        const problemData = encodedMessage.slice(3);
+
+        for (let i = 0; i < problemData.length; i += 9) {
+            const segment = problemData.slice(i, i + 9);
+            if (segment.length < 9) continue;
+
+            const type = segment[0];
+            const cause = segment[1];
+            const propagation = segment[2];
+            const sensitivity = segment[3];
+            const destructiveSize = segment[4];
+            const heightCode = segment[5];
+            const heightQualifier = segment[6] === "1" ? "Over" : "Opptil";
+            const directionsCode = segment.slice(7, 9);
+
+            const height = decodeBase36(heightCode) * 100;
+            const directions = decodeDirections(directionsCode);
+
+            avalancheProblems.push({
+                type: decodeAvalancheProblemType(type),
+                cause: decodeAvalCause(cause),
+                propagation: decodeAvalPropagation(propagation),
+                sensitivity: decodeAvalTriggerSensitivity(sensitivity),
+                destructiveSize: decodeDestructiveSize(destructiveSize),
+                height: `${heightQualifier} ${height} moh`,
+                directions: directions,
+            });
+        }
+
+        return { dangerLevels, avalancheProblems };
+    } catch (error) {
+        console.error("Feil under dekoding:", error);
+        throw new Error("Feil under dekoding av melding.");
+    }
+}
+
+// Event listener for skreddekoder
+document.getElementById("decodeAvalancheButton").addEventListener("click", () => {
+    const encodedMessage = document.getElementById("encodedAvalancheMessage").value.trim();
+
+    try {
+        const decoded = decodeAvalancheMessage(encodedMessage);
+
+        // Oppdater faregrader
+        document.getElementById("dangerLevels").textContent = `Faregrader: ${decoded.dangerLevels.join(", ")}`;
+
+        // Oppdater skredproblemer i tabellen
+        const tableBody = document.getElementById("avalancheTable").querySelector("tbody");
+        tableBody.innerHTML = "";
+
+        decoded.avalancheProblems.forEach(problem => {
+            const row = document.createElement("tr");
+
+            Object.values(problem).forEach(value => {
+                const cell = document.createElement("td");
+                cell.textContent = value;
+                row.appendChild(cell);
+            });
+
+            tableBody.appendChild(row);
+        });
+    } catch (error) {
+        alert(error.message);
+    }
+});
+
