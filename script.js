@@ -66,39 +66,42 @@ function decodeMessage(encodedMessage) {
     }
 }
 
-// Event listener for decode button
-document.getElementById("decodeButton").addEventListener("click", () => {
-    const part1 = document.getElementById("encodedMessage").value.trim();
-    const part2 = document.getElementById("encodedMessagePart2").value.trim();
+// Event listener for weather decoder
+const decodeButton = document.getElementById("decodeButton");
+if (decodeButton) {
+    decodeButton.addEventListener("click", () => {
+        const part1 = document.getElementById("encodedMessage").value.trim();
+        const part2 = document.getElementById("encodedMessagePart2").value.trim();
 
-    const fullMessage = `${part1}${part2}`;
-    console.log("Full message to decode:", fullMessage);
+        const fullMessage = `${part1}${part2}`;
+        console.log("Full message to decode:", fullMessage);
 
-    try {
-        const decoded = decodeMessage(fullMessage);
+        try {
+            const decoded = decodeMessage(fullMessage);
 
-        // Update city and date in the table
-        document.getElementById("weatherDate").textContent = `Sted: ${decoded.cityName}, Dato: ${decoded.date}`;
+            // Update city and date in the table
+            document.getElementById("weatherDate").textContent = `Sted: ${decoded.cityName}, Dato: ${decoded.date}`;
 
-        // Update weather data in the table
-        const tableBody = document.getElementById("weatherTable").querySelector("tbody");
-        tableBody.innerHTML = "";
+            // Update weather data in the table
+            const tableBody = document.getElementById("weatherTable").querySelector("tbody");
+            tableBody.innerHTML = "";
 
-        decoded.data.forEach((data) => {
-            const row = document.createElement("tr");
+            decoded.data.forEach((data) => {
+                const row = document.createElement("tr");
 
-            Object.values(data).forEach((value) => {
-                const cell = document.createElement("td");
-                cell.textContent = value;
-                row.appendChild(cell);
+                Object.values(data).forEach((value) => {
+                    const cell = document.createElement("td");
+                    cell.textContent = value;
+                    row.appendChild(cell);
+                });
+
+                tableBody.appendChild(row);
             });
-
-            tableBody.appendChild(row);
-        });
-    } catch (error) {
-        alert(error.message);
-    }
-});
+        } catch (error) {
+            alert(error.message);
+        }
+    });
+}
 
 // Dekode skreddata
 function decodeAvalancheMessage(encodedMessage) {
@@ -146,32 +149,34 @@ function decodeAvalancheMessage(encodedMessage) {
 }
 
 // Event listener for skreddekoder
-document.getElementById("decodeAvalancheButton").addEventListener("click", () => {
-    const encodedMessage = document.getElementById("encodedAvalancheMessage").value.trim();
+const decodeAvalancheButton = document.getElementById("decodeAvalancheButton");
+if (decodeAvalancheButton) {
+    decodeAvalancheButton.addEventListener("click", () => {
+        const encodedMessage = document.getElementById("encodedAvalancheMessage").value.trim();
 
-    try {
-        const decoded = decodeAvalancheMessage(encodedMessage);
+        try {
+            const decoded = decodeAvalancheMessage(encodedMessage);
 
-        // Oppdater faregrader
-        document.getElementById("dangerLevels").textContent = `Faregrader: ${decoded.dangerLevels.join(", ")}`;
+            // Oppdater faregrader
+            document.getElementById("dangerLevels").textContent = `Faregrader: ${decoded.dangerLevels.join(", ")}`;
 
-        // Oppdater skredproblemer i tabellen
-        const tableBody = document.getElementById("avalancheTable").querySelector("tbody");
-        tableBody.innerHTML = "";
+            // Oppdater skredproblemer i tabellen
+            const tableBody = document.getElementById("avalancheTable").querySelector("tbody");
+            tableBody.innerHTML = "";
 
-        decoded.avalancheProblems.forEach(problem => {
-            const row = document.createElement("tr");
+            decoded.avalancheProblems.forEach(problem => {
+                const row = document.createElement("tr");
 
-            Object.values(problem).forEach(value => {
-                const cell = document.createElement("td");
-                cell.textContent = value;
-                row.appendChild(cell);
+                Object.values(problem).forEach(value => {
+                    const cell = document.createElement("td");
+                    cell.textContent = value;
+                    row.appendChild(cell);
+                });
+
+                tableBody.appendChild(row);
             });
-
-            tableBody.appendChild(row);
-        });
-    } catch (error) {
-        alert(error.message);
-    }
-});
-
+        } catch (error) {
+            alert(error.message);
+        }
+    });
+}
