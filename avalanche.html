@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skreddekoder</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="index.html">Værdekoder</a>
+            <a href="avalanche.html">Skreddekoder</a>
+        </nav>
+    </header>
+
+    <main>
+        <h1>Skreddekoder</h1>
+        <textarea id="encodedAvalancheMessage" placeholder="Lim inn kodet melding her"></textarea>
+        <button id="decodeAvalancheButton">Dekod</button>
+        <h2>Dekodet informasjon</h2>
+        <p id="dangerLevels"></p>
+        <h3>Skredproblemer</h3>
+        <table id="avalancheTable">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Årsak</th>
+                    <th>Spredning</th>
+                    <th>Sensitivitet</th>
+                    <th>Størrelse</th>
+                    <th>Høyde</th>
+                    <th>Retning</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Dekodet informasjon vil vises her -->
+            </tbody>
+        </table>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
