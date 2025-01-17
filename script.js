@@ -238,36 +238,64 @@ function decodeDestructiveSize(code) {
     return mapping[code] || "Ukjent størrelse";
 }
 
-// Event listener for skreddekoder
-const decodeAvalancheButton = document.getElementById("decodeAvalancheButton");
-if (decodeAvalancheButton) {
-    decodeAvalancheButton.addEventListener("click", () => {
-        const encodedMessage = document.getElementById("encodedAvalancheMessage").value.trim();
+// Funksjon for å generere SVG-grafikk for himmelretninger
+function generateDirectionGraphic(directions) {
+    const directionsMap = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+    const highlightedDirections = directions.split(", "); // Forventet format: "N, NE, S"
 
-        try {
-            const decoded = decodeAvalancheMessage(encodedMessage);
+    // SVG-innhold
+    let svg = `<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">`;
+    svg += `<circle cx="50" cy="50" r="48" stroke="black" fill="white" stroke-width="2"/>`;
 
-            // Oppdater faregrader
-            document.getElementById("dangerLevels").textContent = `Faregrader: ${decoded.dangerLevels.join(", ")}`;
+    const angleStep = 360 / directionsMap.length;
+    directionsMap.forEach((dir, index) => {
+        const angle = (angleStep * index - 90) * (Math.PI / 180); // Juster vinkelen til 12:00-posisjon
+        const x1 = 50 + 48 * Math.cos(angle); // Ytre sirkelens punkt
+        const y1 = 50 + 48 * Math.sin(angle);
+        const x2 = 50 + 20 * Math.cos(angle); // Indre punkt for sektorer
+        const y2 = 50 + 20 * Math.sin(angle);
 
-            // Oppdater skredproblemer i tabellen
-            const tableBody = document.getElementById("avalancheTable").querySelector("tbody");
-            tableBody.innerHTML = "";
-
-            decoded.avalancheProblems.forEach(problem => {
-                const row = document.createElement("tr");
-
-                Object.values(problem).forEach(value => {
-                    const cell = document.createElement("td");
-                    cell.textContent = value;
-                    row.appendChild(cell);
-                });
-
-                tableBody.appendChild(row);
-            });
-        } catch (error) {
-            alert(error.message);
-        }
+        // Fyll sektoren hvis den er markert
+        const isHighlighted = highlightedDirections.includes(dir);
+        svg += `<path d="M50,50 L${x1},${y1} A48,48 0 0,1 ${x2},${y2} Z" fill="${isHighlighted ? "red" : "none"}" stroke="black" stroke-width="1"/>`;
     });
+
+    svg += `</svg>`;
+    return svg;
 }
+
+// Oppdater event listener for skreddekoder
+document.getElementById("decodeAvalancheButton").addEventListener("click", () => {
+    const encodedMessage = document.getElementById("encodedAvalancheMessage").value.trim();
+
+    try {
+        const decoded = decodeAvalancheMessage(encodedMessage);
+
+        // Oppdater faregrader
+        document.getElementById("dangerLevels").textContent = `Faregrader: ${decoded.dangerLevels.join(", ")}`;
+
+        // Oppdater skredproblemer i tabellen
+        const tableBody = document.getElementById("avalancheTableBody");
+        tableBody.innerHTML = "";
+
+        decoded.avalancheProblems.forEach(problem => {
+            const row = document.createElement("tr");
+
+            Object.keys(problem).forEach(key => {
+                const cell = document.createElement("td");
+                if (key === "directions") {
+                    // Legg til SVG for retninger
+                    cell.innerHTML = generateDirectionGraphic(problem[key]);
+                } else {
+                    cell.textContent = problem[key];
+                }
+                row.appendChild(cell);
+            });
+
+            tableBody.appendChild(row);
+        });
+    } catch (error) {
+        alert(error.message);
+    }
+});
 
