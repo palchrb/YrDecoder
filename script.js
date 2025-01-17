@@ -249,8 +249,8 @@ function generateDirectionGraphic(directions) {
 
     const angleStep = 360 / directionsMap.length;
     directionsMap.forEach((dir, index) => {
-        const startAngle = (angleStep * index - 90) * (Math.PI / 180); // Startvinkelen for sektoren
-        const endAngle = (angleStep * (index + 1) - 90) * (Math.PI / 180); // Sluttvinkelen for sektoren
+        const startAngle = (angleStep * index - 22.5) * (Math.PI / 180); // Startvinkelen justert for loddrett N
+        const endAngle = (angleStep * (index + 1) - 22.5) * (Math.PI / 180); // Sluttvinkelen justert
 
         const x1 = 50 + 48 * Math.cos(startAngle);
         const y1 = 50 + 48 * Math.sin(startAngle);
@@ -271,6 +271,7 @@ function generateDirectionGraphic(directions) {
     svg += `</svg>`;
     return svg;
 }
+
 
 
 // Oppdater event listener for skreddekoder
