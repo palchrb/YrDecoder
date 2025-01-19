@@ -341,8 +341,11 @@ document.addEventListener("DOMContentLoaded", () => {
             // Oppdater faregrader
             document.getElementById("dangerLevels").textContent = `Faregrader: ${decoded.dangerLevels.join(", ")}`;
 
-            // Oppdater vurdering
-            document.getElementById("vurdering").textContent = `Vurdering: ${decoded.vurdering}`;
+            // Oppdater vurdering (hvis elementet finnes)
+            const vurderingElement = document.getElementById("vurdering");
+            if (vurderingElement) {
+                vurderingElement.textContent = `Vurdering: ${decoded.vurdering}`;
+            }
 
             // Oppdater skredproblemer i tabellen
             const tableBody = document.getElementById("avalancheTable").querySelector("tbody");
