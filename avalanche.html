@@ -12,7 +12,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start;
+            justify-content: center;
             min-height: 100vh;
             background-color: #f0f0f0;
         }
@@ -46,18 +46,11 @@
             background-color: #0056b3;
         }
 
-        /* Innpakning for tabellen */
-        .table-container {
-            width: 100%;
-            overflow-x: auto; /* Gjør tabellen skrollbar horisontalt */
-            margin: 20px 0;
-        }
-
         table {
-            width: 100%;
+            width: 90%;
             max-width: 600px;
             border-collapse: collapse;
-            margin: 0 auto;
+            margin: 20px 0;
         }
 
         th, td {
@@ -75,52 +68,46 @@
             background-color: #f2f2f2;
         }
 
-        /* Media Query for små skjermer */
-        @media screen and (max-width: 600px) {
-            th, td {
-                font-size: 14px;
-                padding: 6px;
-            }
+        .vurdering {
+            font-size: 16px;
+            margin: 20px 0;
+            color: #333;
+            text-align: left;
+            width: 90%;
+            max-width: 600px;
         }
     </style>
 </head>
 <body>
-    <!-- Navigeringsmeny -->
     <nav>
-        <ul style="display: flex; gap: 20px; list-style: none; padding: 0; margin: 10px 0;">
+        <ul style="display: flex; gap: 20px; list-style: none; padding: 0;">
             <li><a href="index.html" id="weatherDecoderLink">Værdekoder</a></li>
             <li><a href="avalanche.html" id="avalancheDecoderLink">Skreddekoder</a></li>
         </ul>
     </nav>
-
     <h1>Skreddekoder</h1>
-    <p>Lim inn kodet melding nedenfor:</p>
-    <textarea id="encodedAvalancheMessage" placeholder="Lim inn kodet melding her"></textarea>
+    <textarea id="encodedAvalancheMessage1" placeholder="Lim inn første del av meldingen her"></textarea>
+    <textarea id="encodedAvalancheMessage2" placeholder="Lim inn andre del av meldingen her"></textarea>
     <button id="decodeAvalancheButton">Dekod</button>
-    <h2>Dekodet informasjon</h2>
-    <p id="dangerLevels"></p>
-    <h3>Skredproblemer</h3>
 
-    <!-- Innpakning for å sikre responsiv tabell -->
-    <div class="table-container">
-        <table id="avalancheTable">
-            <thead>
-                <tr>
-                    <th>Type</th>
-                    <th>Årsak</th>
-                    <th>Spredning</th>
-                    <th>Sensitivitet</th>
-                    <th>Størrelse</th>
-                    <th>Høyde</th>
-                    <th>Retning</th>
-                </tr>
-            </thead>
-            <tbody id="avalancheTableBody">
-    <!-- Dekodet informasjon vises her -->
-    </tbody>
+    <p class="vurdering" id="vurdering">Vurdering: Ingen vurdering tilgjengelig.</p>
 
-        </table>
-    </div>
+    <table id="avalancheTable">
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>Årsak</th>
+                <th>Spredning</th>
+                <th>Sensitivitet</th>
+                <th>Størrelse</th>
+                <th>Høyde</th>
+                <th>Retning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Dekodet informasjon vil vises her -->
+        </tbody>
+    </table>
 
     <script src="script.js"></script>
 </body>
