@@ -1,4 +1,4 @@
-// Dekode skreddata
+// Dekode skredddata
 // Funksjon for å dekode meldingen
 function decodeAvalancheMessage(encodedMessage) {
     try {
