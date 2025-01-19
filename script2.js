@@ -168,75 +168,26 @@ function generateDirectionGraphic(directions) {
 
 // Oppdater event listener for skreddekoder
 // Sørg for at koden kjører etter at DOM-en er lastet
+// Event listener for skreddekoder
 document.addEventListener("DOMContentLoaded", () => {
-    // Dekode skreddata
-    function decodeAvalancheMessage(encodedMessage) {
-        try {
-            if (!encodedMessage || encodedMessage.trim() === "") {
-                throw new Error("Ingen melding oppgitt.");
-            }
+    console.log("Avalanche decoder loaded.");
 
-            const [codePart, vurderingPart] = encodedMessage.split(";"); // Split koden og vurderingen
-            if (!codePart) throw new Error("Ingen kodet melding funnet.");
-
-            const dangerLevels = codePart.slice(0, 3).split("").map(d => decodeBase36(d));
-            const avalancheProblems = [];
-            const problemData = codePart.slice(3);
-
-            for (let i = 0; i < problemData.length; i += 9) {
-                const segment = problemData.slice(i, i + 9);
-                if (segment.length < 9) continue;
-
-                const type = segment[0];
-                const cause = segment[1];
-                const propagation = segment[2];
-                const sensitivity = segment[3];
-                const destructiveSize = segment[4];
-                const heightCode = segment[5];
-                const heightQualifier = segment[6] === "1" ? "Over" : "Opptil";
-                const directionsCode = segment.slice(7, 9);
-
-                const height = decodeBase36(heightCode) * 100;
-                const directions = decodeDirections(directionsCode);
-
-                avalancheProblems.push({
-                    type: decodeAvalancheProblemType(type),
-                    cause: decodeAvalCause(cause),
-                    propagation: decodeAvalPropagation(propagation),
-                    sensitivity: decodeAvalTriggerSensitivity(sensitivity),
-                    destructiveSize: decodeDestructiveSize(destructiveSize),
-                    height: `${heightQualifier} ${height} moh`,
-                    directions: directions,
-                });
-            }
-
-            return { dangerLevels, avalancheProblems, vurdering: vurderingPart || "Ingen vurdering tilgjengelig." };
-        } catch (error) {
-            console.error("Feil under dekoding:", error);
-            throw new Error("Feil under dekoding av melding.");
-        }
-    }
-
-    // Event listener for skreddekoder
     document.getElementById("decodeAvalancheButton").addEventListener("click", () => {
         const encodedMessage1 = document.getElementById("encodedAvalancheMessage1").value.trim();
         const encodedMessage2 = document.getElementById("encodedAvalancheMessage2").value.trim();
 
+        console.log("Encoded Message Part 1:", encodedMessage1);
+        console.log("Encoded Message Part 2:", encodedMessage2);
+
         const fullMessage = `${encodedMessage1}${encodedMessage2}`;
+        console.log("Full Encoded Message:", fullMessage);
 
         try {
             const decoded = decodeAvalancheMessage(fullMessage);
 
-            // Oppdater faregrader
             document.getElementById("dangerLevels").textContent = `Faregrader: ${decoded.dangerLevels.join(", ")}`;
+            document.getElementById("vurdering").textContent = `Vurdering: ${decoded.vurdering}`;
 
-            // Oppdater vurdering (hvis elementet finnes)
-            const vurderingElement = document.getElementById("vurdering");
-            if (vurderingElement) {
-                vurderingElement.textContent = `Vurdering: ${decoded.vurdering}`;
-            }
-
-            // Oppdater skredproblemer i tabellen
             const tableBody = document.getElementById("avalancheTable").querySelector("tbody");
             tableBody.innerHTML = "";
 
@@ -245,15 +196,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 Object.values(problem).forEach(value => {
                     const cell = document.createElement("td");
-                    cell.textContent = value;
+                    if (value.includes("N") || value.includes("S")) {
+                        cell.innerHTML = generateDirectionGraphic(value);
+                    } else {
+                        cell.textContent = value;
+                    }
                     row.appendChild(cell);
                 });
 
                 tableBody.appendChild(row);
             });
         } catch (error) {
+            console.error("Error decoding avalanche message:", error);
             alert(error.message);
         }
     });
 });
-
