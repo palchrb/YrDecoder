@@ -111,9 +111,12 @@ function decodeAvalancheMessage(encodedMessage) {
             throw new Error("Ingen melding oppgitt.");
         }
 
-        const dangerLevels = encodedMessage.slice(0, 3).split("").map(d => decodeBase36(d));
+        const [codePart, vurderingPart] = encodedMessage.split(";"); // Split koden og vurderingen
+        if (!codePart) throw new Error("Ingen kodet melding funnet.");
+
+        const dangerLevels = codePart.slice(0, 3).split("").map(d => decodeBase36(d));
         const avalancheProblems = [];
-        const problemData = encodedMessage.slice(3);
+        const problemData = codePart.slice(3);
 
         for (let i = 0; i < problemData.length; i += 9) {
             const segment = problemData.slice(i, i + 9);
@@ -142,13 +145,12 @@ function decodeAvalancheMessage(encodedMessage) {
             });
         }
 
-        return { dangerLevels, avalancheProblems };
+        return { dangerLevels, avalancheProblems, vurdering: vurderingPart || "Ingen vurdering tilgjengelig." };
     } catch (error) {
         console.error("Feil under dekoding:", error);
         throw new Error("Feil under dekoding av melding.");
     }
 }
-
 // Funksjon for å dekode Base36-verdi
 function decodeBase36(value) {
     return parseInt(value, 36);
