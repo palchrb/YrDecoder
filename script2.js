@@ -1,21 +1,34 @@
-// Dekode skredddata
-// Funksjon for å dekode meldingen
+// Dekode skreddata
 function decodeAvalancheMessage(encodedMessage) {
     try {
         if (!encodedMessage || encodedMessage.trim() === "") {
             throw new Error("Ingen melding oppgitt.");
         }
 
+        console.log("Full encoded message:", encodedMessage);
+
         const [codePart, vurderingPart] = encodedMessage.split(";"); // Split koden og vurderingen
         if (!codePart) throw new Error("Ingen kodet melding funnet.");
 
+        console.log("Code part:", codePart);
+        console.log("Vurdering part:", vurderingPart || "Ingen vurdering tilgjengelig.");
+
         const dangerLevels = codePart.slice(0, 3).split("").map(d => decodeBase36(d));
+        console.log("Decoded danger levels:", dangerLevels);
+
         const avalancheProblems = [];
         const problemData = codePart.slice(3);
 
+        console.log("Problem data segment:", problemData);
+
         for (let i = 0; i < problemData.length; i += 9) {
             const segment = problemData.slice(i, i + 9);
-            if (segment.length < 9) continue;
+            if (segment.length < 9) {
+                console.warn("Incomplete segment detected:", segment);
+                continue;
+            }
+
+            console.log("Processing segment:", segment);
 
             const type = segment[0];
             const cause = segment[1];
@@ -40,33 +53,14 @@ function decodeAvalancheMessage(encodedMessage) {
             });
         }
 
+        console.log("Decoded avalanche problems:", avalancheProblems);
+
         return { dangerLevels, avalancheProblems, vurdering: vurderingPart || "Ingen vurdering tilgjengelig." };
     } catch (error) {
         console.error("Feil under dekoding:", error);
         throw new Error("Feil under dekoding av melding.");
     }
 }
-// Funksjon for å dekode Base36-verdi
-function decodeBase36(value) {
-    return parseInt(value, 36);
-}
-
-// Funksjon for å dekode himmelretninger fra en streng som "11110000"
-function decodeDirections(base36String) {
-    if (!/^[0-9a-z]{1,2}$/.test(base36String)) {
-        console.error(`Ugyldig Base36-verdi for retninger: ${base36String}`);
-        return "Ukjent retning";
-    }
-
-    const binaryString = parseInt(base36String, 36).toString(2).padStart(8, "0");
-    const directionsMap = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
-    return binaryString
-        .split("")
-        .map((bit, index) => (bit === "1" ? directionsMap[index] : null))
-        .filter(Boolean)
-        .join(", ");
-}
-
 // Dekodingsfunksjoner for skreddata
 function decodeAvalancheProblemType(code) {
     const mapping = {
