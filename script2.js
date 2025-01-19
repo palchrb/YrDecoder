@@ -94,6 +94,28 @@ function decodeAvalCause(code) {
     return mapping[code] || "Ukjent årsak";
 }
 
+
+// Funksjon for å dekode himmelretninger fra en streng som "11110000"
+function decodeDirections(base36String) {
+    console.log("Decoding directions for Base36 value:", base36String);
+
+    if (!/^[0-9a-z]{1,2}$/.test(base36String)) {
+        console.error(`Ugyldig Base36-verdi for retninger: ${base36String}`);
+        return "Ukjent retning";
+    }
+
+    const binaryString = parseInt(base36String, 36).toString(2).padStart(8, "0");
+    console.log("Binary representation for directions:", binaryString);
+
+    const directionsMap = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+    return binaryString
+        .split("")
+        .map((bit, index) => (bit === "1" ? directionsMap[index] : null))
+        .filter(Boolean)
+        .join(", ");
+}
+
+
 function decodeAvalPropagation(code) {
     const mapping = {
         "0": "Ikke gitt",
