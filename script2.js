@@ -129,6 +129,14 @@ function decodeDestructiveSize(code) {
     return mapping[code] || "Ukjent størrelse";
 }
 
+
+// Funksjon for å dekode Base36-verdi
+function decodeBase36(value) {
+    console.log("Decoding Base36 value:", value);
+    return parseInt(value, 36);
+}
+
+
 // Funksjon for å generere SVG-grafikk for himmelretninger
 function generateDirectionGraphic(directions) {
     const directionsMap = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
