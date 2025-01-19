@@ -222,20 +222,23 @@ document.addEventListener("DOMContentLoaded", () => {
             tableBody.innerHTML = "";
 
             decoded.avalancheProblems.forEach(problem => {
-                const row = document.createElement("tr");
+    const row = document.createElement("tr");
 
-                Object.values(problem).forEach(value => {
-                    const cell = document.createElement("td");
-                    if (value.includes("N") || value.includes("S")) {
-                        cell.innerHTML = generateDirectionGraphic(value);
-                    } else {
-                        cell.textContent = value;
-                    }
-                    row.appendChild(cell);
-                });
+    Object.entries(problem).forEach(([key, value]) => {
+        const cell = document.createElement("td");
 
-                tableBody.appendChild(row);
-            });
+        // Legg SVG kun i retning-cellene
+        if (key === "directions") {
+            const graphic = generateDirectionGraphic(value);
+            cell.innerHTML = graphic; // Bruker innerHTML for SVG
+        } else {
+            cell.textContent = value;
+        }
+        row.appendChild(cell);
+    });
+
+    tableBody.appendChild(row);
+});
         } catch (error) {
             console.error("Error decoding avalanche message:", error);
             alert(error.message);
