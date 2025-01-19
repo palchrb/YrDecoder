@@ -279,29 +279,30 @@ function generateDirectionGraphic(directions) {
 
 // Oppdater event listener for skreddekoder
 document.getElementById("decodeAvalancheButton").addEventListener("click", () => {
-    const encodedMessage = document.getElementById("encodedAvalancheMessage").value.trim();
+    const encodedMessage1 = document.getElementById("encodedAvalancheMessage1").value.trim();
+    const encodedMessage2 = document.getElementById("encodedAvalancheMessage2").value.trim();
+
+    const fullMessage = `${encodedMessage1}${encodedMessage2}`;
 
     try {
-        const decoded = decodeAvalancheMessage(encodedMessage);
+        const decoded = decodeAvalancheMessage(fullMessage);
 
         // Oppdater faregrader
         document.getElementById("dangerLevels").textContent = `Faregrader: ${decoded.dangerLevels.join(", ")}`;
 
+        // Oppdater vurdering
+        document.getElementById("vurdering").textContent = `Vurdering: ${decoded.vurdering}`;
+
         // Oppdater skredproblemer i tabellen
-        const tableBody = document.getElementById("avalancheTableBody");
+        const tableBody = document.getElementById("avalancheTable").querySelector("tbody");
         tableBody.innerHTML = "";
 
         decoded.avalancheProblems.forEach(problem => {
             const row = document.createElement("tr");
 
-            Object.keys(problem).forEach(key => {
+            Object.values(problem).forEach(value => {
                 const cell = document.createElement("td");
-                if (key === "directions") {
-                    // Legg til SVG for retninger
-                    cell.innerHTML = generateDirectionGraphic(problem[key]);
-                } else {
-                    cell.textContent = problem[key];
-                }
+                cell.textContent = value;
                 row.appendChild(cell);
             });
 
@@ -311,4 +312,3 @@ document.getElementById("decodeAvalancheButton").addEventListener("click", () =>
         alert(error.message);
     }
 });
-
