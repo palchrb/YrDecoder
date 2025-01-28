@@ -114,6 +114,15 @@ if (decodeButton) {
                 timeCell.textContent = data.time;
                 row.appendChild(timeCell);
 
+                const iconCell = document.createElement("td");
+                const iconImg = document.createElement("img");
+                iconImg.src = data.icon;
+                iconImg.alt = "Weather Icon";
+                iconImg.style.width = "32px";
+                iconImg.style.height = "32px";
+                iconCell.appendChild(iconImg);
+                row.appendChild(iconCell);
+                
                 const tempCell = document.createElement("td");
                 tempCell.textContent = data.temp;
                 row.appendChild(tempCell);
@@ -129,15 +138,6 @@ if (decodeButton) {
                 const directionCell = document.createElement("td");
                 directionCell.textContent = data.direction;
                 row.appendChild(directionCell);
-
-                const iconCell = document.createElement("td");
-                const iconImg = document.createElement("img");
-                iconImg.src = data.icon;
-                iconImg.alt = "Weather Icon";
-                iconImg.style.width = "32px";
-                iconImg.style.height = "32px";
-                iconCell.appendChild(iconImg);
-                row.appendChild(iconCell);
 
                 tableBody.appendChild(row);
             });
