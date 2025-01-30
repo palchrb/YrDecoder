@@ -1,6 +1,6 @@
 // service-worker.js
 
-const CACHE_NAME = "weather-decoder-v10";
+const CACHE_NAME = "weather-decoder-v11";
 
 // Ikonliste
 const iconList = [
@@ -16,9 +16,10 @@ const iconList = [
 
 // Basisfiler (absolutte stier m/ YrDecoder i path)
 const baseResources = [
-  "/YrDecoder/",              // cachen index-siden
+  "/YrDecoder/avalanche.html",              // cachen index-siden
   "/YrDecoder/index.html",
   "/YrDecoder/script.js",
+  "/YrDecoder/script2.js",
   "/YrDecoder/manifest.json", // hvis du bruker den
   // ev. "/YrDecoder/style.css", "/YrDecoder/icon.png" osv...
 ];
