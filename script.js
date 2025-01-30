@@ -78,7 +78,7 @@ function decodeMessage(encodedMessage) {
                 precip: precip === 0 ? "" : `${precip.toFixed(1)}`,
                 wind: `${wind} (${gust})`,
                 direction: direction,
-                icon: `/svg/${weatherIconFile}.svg`
+                icon: `svg/${weatherIconFile}.svg`
             };
         });
 
