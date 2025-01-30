@@ -12,16 +12,14 @@ const weatherIconMapping = [
 
 
 if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-        navigator.serviceWorker.register("/service-worker.js")
-            .then((registration) => {
-                console.log("Service Worker registrert med omfang:", registration.scope);
-            })
-            .catch((error) => {
-                console.error("Service Worker registrering feilet:", error);
-            });
-    });
+  window.addEventListener("load", () => {
+    // Bruk relativ sti - filen ligger i samme mappe som script.js
+    navigator.serviceWorker.register("./service-worker.js")
+      .then(() => console.log("Service Worker registrert."))
+      .catch(err => console.error("Feil ved registrering av SW:", err));
+  });
 }
+
 
 
 
