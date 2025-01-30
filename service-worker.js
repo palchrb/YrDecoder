@@ -1,14 +1,14 @@
-const CACHE_NAME = "weather-decoder-v7";
-const DB_NAME = "WeatherPWA";
-const STORE_NAME = "files";
+const CACHE_NAME = "weather-decoder-v6";
 const ICONS_PATH = "/svg/";
+const DB_NAME = "WeatherIconsDB";
+const STORE_NAME = "icons";
 
-// Liste over nødvendige ressurser
+// Liste over ressurser som skal caches i nettleserens cache (korttidslagring)
 const resourcesToCache = [
   "/", "/index.html", "/script.js"
 ];
 
-// Liste over ikonfiler
+// Liste over ikon-filer som skal lagres i IndexedDB (langtidslagring)
 const iconFiles = [
   "01d", "01n", "01m", "02d", "02n", "02m", "03d", "03n", "03m", "04",
   "05d", "05n", "05m", "06d", "06n", "06m", "07d", "07n", "07m", "08d",
@@ -20,93 +20,91 @@ const iconFiles = [
   "44d", "44n", "44m", "45d", "45n", "45m", "46", "47", "48", "49", "50"
 ].map(icon => `${ICONS_PATH}${icon}.svg`);
 
-// Åpne eller opprett IndexedDB
-function openDatabase() {
+// **Installer Service Worker og cache nødvendige ressurser**
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.addAll(resourcesToCache);
+    }).then(() => {
+      return storeIconsInDB();
+    })
+  );
+});
+
+// **Henter ikon fra IndexedDB eller faller tilbake til nettverket**
+async function getIconFromDB(iconUrl) {
+  const db = await openDB();
+  const tx = db.transaction(STORE_NAME, "readonly");
+  const store = tx.objectStore(STORE_NAME);
+  const data = await store.get(iconUrl);
+  return data ? new Response(data, { headers: { "Content-Type": "image/svg+xml" } }) : null;
+}
+
+// **Håndter fetch-hendelser**
+self.addEventListener("fetch", (event) => {
+  const { request } = event;
+  
+  if (request.url.includes(ICONS_PATH)) {
+    event.respondWith(
+      getIconFromDB(request.url).then(response => {
+        return response || fetch(request).then(async networkResponse => {
+          const clone = networkResponse.clone();
+          await storeIconInDB(request.url, clone);
+          return networkResponse;
+        });
+      })
+    );
+  } else {
+    event.respondWith(
+      caches.match(request).then(response => {
+        return response || fetch(request);
+      })
+    );
+  }
+});
+
+// **Opprett eller åpne IndexedDB for ikon-lagring**
+function openDB() {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, 1);
     request.onupgradeneeded = (event) => {
-      let db = event.target.result;
+      const db = event.target.result;
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         db.createObjectStore(STORE_NAME);
       }
     };
     request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject("IndexedDB kunne ikke åpnes.");
+    request.onerror = () => reject(request.error);
   });
 }
 
-// Lagre en fil i IndexedDB
-async function saveToIndexedDB(url, response) {
-  const db = await openDatabase();
+// **Lagrer ikoner i IndexedDB**
+async function storeIconInDB(url, response) {
+  const db = await openDB();
+  const blob = await response.blob();
   const tx = db.transaction(STORE_NAME, "readwrite");
   const store = tx.objectStore(STORE_NAME);
-  const blob = await response.blob();
   store.put(blob, url);
 }
 
-// Hente en fil fra IndexedDB
-async function getFromIndexedDB(url) {
-  const db = await openDatabase();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, "readonly");
-    const store = tx.objectStore(STORE_NAME);
-    const request = store.get(url);
-    request.onsuccess = () => request.result ? resolve(new Response(request.result)) : reject();
-    request.onerror = () => reject();
-  });
+// **Lagrer alle ikonene i IndexedDB ved installasjon**
+async function storeIconsInDB() {
+  const db = await openDB();
+  const tx = db.transaction(STORE_NAME, "readwrite");
+  const store = tx.objectStore(STORE_NAME);
+
+  for (const iconUrl of iconFiles) {
+    try {
+      const response = await fetch(iconUrl);
+      const blob = await response.blob();
+      store.put(blob, iconUrl);
+    } catch (error) {
+      console.warn(`Kunne ikke lagre ikon: ${iconUrl}`, error);
+    }
+  }
 }
 
-// Installer Service Worker og cache ressurser
-self.addEventListener("install", (event) => {
-  event.waitUntil(
-    (async () => {
-      const cache = await caches.open(CACHE_NAME);
-      await cache.addAll(resourcesToCache);
-
-      // Lagrer ikonene i IndexedDB
-      for (const icon of iconFiles) {
-        try {
-          const response = await fetch(icon);
-          if (response.ok) {
-            await saveToIndexedDB(icon, response);
-          } else {
-            console.warn(`Kunne ikke laste ikon: ${icon}`);
-          }
-        } catch (error) {
-          console.warn(`Feil ved henting av ikon: ${icon}`, error);
-        }
-      }
-    })()
-  );
-});
-
-// Håndter fetch-hendelser med IndexedDB fallback
-self.addEventListener("fetch", (event) => {
-  event.respondWith(
-    (async () => {
-      const cache = await caches.open(CACHE_NAME);
-      const cachedResponse = await cache.match(event.request);
-      if (cachedResponse) return cachedResponse;
-
-      try {
-        const networkResponse = await fetch(event.request);
-        if (event.request.url.includes(ICONS_PATH)) {
-          await saveToIndexedDB(event.request.url, networkResponse.clone());
-        } else {
-          cache.put(event.request, networkResponse.clone());
-        }
-        return networkResponse;
-      } catch (error) {
-        if (event.request.url.includes(ICONS_PATH)) {
-          return getFromIndexedDB(event.request.url).catch(() => new Response("?", { status: 404 }));
-        }
-        return new Response("Offline - Ressurs ikke tilgjengelig", { status: 503 });
-      }
-    })()
-  );
-});
-
-// Fjerner gamle cacher ved oppdatering
+// **Fjerner gamle cacher og oppdaterer service worker**
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
