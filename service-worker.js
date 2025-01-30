@@ -1,66 +1,118 @@
-const CACHE_NAME = "weather-decoder-v3"; // Ny versjon for å sikre oppdatering
+const CACHE_NAME = "weather-decoder-v6";
 const ICONS_PATH = "/svg/";
 
+// **Ressurser som skal caches**
 const resourcesToCache = [
-  "/", 
-  "/index.html", 
-  "/script.js",
-  // Liste over alle ikonene i `svg/`-mappen
-  "/svg/01d.svg", "/svg/01n.svg", "/svg/01m.svg",
-  "/svg/02d.svg", "/svg/02n.svg", "/svg/02m.svg",
-  "/svg/03d.svg", "/svg/03n.svg", "/svg/03m.svg",
-  "/svg/04.svg",
-  "/svg/05d.svg", "/svg/05n.svg", "/svg/05m.svg",
-  "/svg/06d.svg", "/svg/06n.svg", "/svg/06m.svg",
-  "/svg/07d.svg", "/svg/07n.svg", "/svg/07m.svg",
-  "/svg/08d.svg", "/svg/08n.svg", "/svg/08m.svg",
-  "/svg/09.svg", "/svg/10.svg", "/svg/11.svg",
-  "/svg/12.svg", "/svg/13.svg", "/svg/14.svg",
-  "/svg/15.svg",
-  "/svg/20d.svg", "/svg/20n.svg", "/svg/20m.svg",
-  "/svg/21d.svg", "/svg/21n.svg", "/svg/21m.svg",
-  "/svg/22.svg", "/svg/23.svg",
-  "/svg/24d.svg", "/svg/24n.svg", "/svg/24m.svg",
-  "/svg/25d.svg", "/svg/25n.svg", "/svg/25m.svg",
-  "/svg/26d.svg", "/svg/26n.svg", "/svg/26m.svg",
-  "/svg/27d.svg", "/svg/27n.svg", "/svg/27m.svg",
-  "/svg/28d.svg", "/svg/28n.svg", "/svg/28m.svg",
-  "/svg/29d.svg", "/svg/29n.svg", "/svg/29m.svg",
-  "/svg/30.svg", "/svg/31.svg", "/svg/32.svg",
-  "/svg/33.svg", "/svg/34.svg",
-  "/svg/40d.svg", "/svg/40n.svg", "/svg/40m.svg",
-  "/svg/41d.svg", "/svg/41n.svg", "/svg/41m.svg",
-  "/svg/42d.svg", "/svg/42n.svg", "/svg/42m.svg",
-  "/svg/43d.svg", "/svg/43n.svg", "/svg/43m.svg",
-  "/svg/44d.svg", "/svg/44n.svg", "/svg/44m.svg",
-  "/svg/45d.svg", "/svg/45n.svg", "/svg/45m.svg",
-  "/svg/46.svg", "/svg/47.svg", "/svg/48.svg",
-  "/svg/49.svg", "/svg/50.svg"
-];
+  "/", "/index.html", "/script.js"
+].concat([
+  "01d", "01n", "01m", "02d", "02n", "02m", "03d", "03n", "03m", "04",
+  "05d", "05n", "05m", "06d", "06n", "06m", "07d", "07n", "07m", "08d",
+  "08n", "08m", "09", "10", "11", "12", "13", "14", "15", "20d", "20n",
+  "20m", "21d", "21n", "21m", "22", "23", "24d", "24n", "24m", "25d",
+  "25n", "25m", "26d", "26n", "26m", "27d", "27n", "27m", "28d", "28n",
+  "28m", "29d", "29n", "29m", "30", "31", "32", "33", "34", "40d", "40n",
+  "40m", "41d", "41n", "41m", "42d", "42n", "42m", "43d", "43n", "43m",
+  "44d", "44n", "44m", "45d", "45n", "45m", "46", "47", "48", "49", "50"
+].map(icon => `/svg/${icon}.svg`));
 
+// **Åpne eller opprett IndexedDB**
+function openDatabase() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open("weatherPWA", 1);
+
+    request.onupgradeneeded = (event) => {
+      let db = event.target.result;
+      if (!db.objectStoreNames.contains("files")) {
+        db.createObjectStore("files");
+      }
+    };
+
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject("IndexedDB kunne ikke åpnes.");
+  });
+}
+
+// **Lagre filer i IndexedDB**
+function saveToIndexedDB(url, response) {
+  return openDatabase().then((db) => {
+    return response.blob().then((blob) => {
+      const transaction = db.transaction("files", "readwrite");
+      const store = transaction.objectStore("files");
+      store.put(blob, url);
+      return transaction.complete;
+    });
+  });
+}
+
+// **Hent en fil fra IndexedDB**
+function getFromIndexedDB(url) {
+  return openDatabase().then((db) => {
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction("files");
+      const store = transaction.objectStore("files");
+      const request = store.get(url);
+
+      request.onsuccess = () => {
+        if (request.result) {
+          resolve(new Response(request.result));
+        } else {
+          reject("Fil ikke funnet i IndexedDB.");
+        }
+      };
+      request.onerror = () => reject("Feil ved henting fra IndexedDB.");
+    });
+  });
+}
+
+// **Installer Service Worker og cache filer**
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(resourcesToCache);
+      return Promise.all(
+        resourcesToCache.map((resource) => {
+          return fetch(resource)
+            .then((response) => {
+              if (!response.ok) throw new Error(`Feil: ${response.status}`);
+              cache.put(resource, response.clone());
+              return saveToIndexedDB(resource, response.clone()); // Lagre i IndexedDB også
+            })
+            .catch((error) => console.warn(`Kunne ikke cache ${resource}:`, error));
+        })
+      );
     })
   );
 });
 
+// **Håndter fetch-hendelser (cache first, fallback til IndexedDB)**
 self.addEventListener("fetch", (event) => {
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
+    caches.match(event.request).then((cachedResponse) => {
+      if (cachedResponse) return cachedResponse;
+
+      return fetch(event.request)
+        .then((networkResponse) => {
+          return caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, networkResponse.clone());
+            saveToIndexedDB(event.request.url, networkResponse.clone()); // Lagre i IndexedDB også
+            return networkResponse;
+          });
+        })
+        .catch(() => {
+          console.warn("Kunne ikke hente fra nettet:", event.request.url);
+          return getFromIndexedDB(event.request.url); // Fallback til IndexedDB
+        });
     })
   );
 });
 
+// **Fjern gamle cacher ved oppdatering**
 self.addEventListener("activate", (event) => {
-  const cacheWhitelist = [CACHE_NAME]; // Bare den nye cachen beholdes
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          if (!cacheWhitelist.includes(cacheName)) {
+          if (cacheName !== CACHE_NAME) {
+            console.log("Sletter gammel cache:", cacheName);
             return caches.delete(cacheName);
           }
         })
