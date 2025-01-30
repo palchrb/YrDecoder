@@ -10,6 +10,21 @@ const weatherIconMapping = [
     "44d", "44n", "44m", "45d", "45n", "45m", "46", "47", "48", "49", "50"
 ];
 
+
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/service-worker.js")
+            .then((registration) => {
+                console.log("Service Worker registrert med omfang:", registration.scope);
+            })
+            .catch((error) => {
+                console.error("Service Worker registrering feilet:", error);
+            });
+    });
+}
+
+
+
 // Base85 til indeks-konvertering
 const base85Chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!#$%&()*+-;<=>?@^_`{|}~";
 const base85ToInt = (char) => base85Chars.indexOf(char);
@@ -147,16 +162,6 @@ if (decodeButton) {
     });
 }
 
-if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-        navigator.serviceWorker.register("/service-worker.js")
-            .then((registration) => {
-                console.log("Service Worker registrert med omfang:", registration.scope);
-            })
-            .catch((error) => {
-                console.error("Service Worker registrering feilet:", error);
-            });
-    });
-}
+
 
 
