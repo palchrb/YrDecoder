@@ -26,6 +26,7 @@ const baseResources = [
   "/YrDecoder/script.js",
   "/YrDecoder/script2.js",
   "/YrDecoder/manifest.json",
+  "/YrDecoder/cmd.html",
   // Add more files here (CSS, images, etc.) if needed
 ];
 
