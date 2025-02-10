@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InReach Kommandoer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #333;
+        }
+        .cmd-container {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .cmd-title {
+            font-weight: bold;
+            color: #0077cc;
+        }
+        .cmd-example {
+            font-family: monospace;
+            background: #eee;
+            padding: 5px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>InReach Kommandoer</h1>
+    <p>Denne siden viser hvilke kommandoer som kan brukes i InReach-meldinger.</p>
+
+    <div class="cmd-container">
+        <p class="cmd-title">📍 Shelter (hytter i nærheten)</p>
+        <p><strong>Syntaks:</strong> <span class="cmd-example">shelter</span></p>
+        <p><strong>Beskrivelse:</strong> Finner de nærmeste hytter/nødbuene basert på din posisjon.</p>
+        <p><strong>Eksempel:</strong> <span class="cmd-example">shelter</span></p>
+    </div>
+
+    <div class="cmd-container">
+        <p class="cmd-title">🚆 Start togsporing</p>
+        <p><strong>Syntaks:</strong> <span class="cmd-example">start rail &lt;tog&gt; &lt;dato&gt; &lt;tid&gt; &lt;fra&gt; &lt;til&gt;</span></p>
+        <p><strong>Beskrivelse:</strong> Starter sporing av et tog.</p>
+        <p><strong>Eksempel:</strong> <span class="cmd-example">start rail F5 2025-02-07 09:46 Asker-Stavanger</span></p>
+    </div>
+
+    <div class="cmd-container">
+        <p class="cmd-title">🛑 Stoppe togsporing</p>
+        <p><strong>Syntaks:</strong> <span class="cmd-example">stop rail ticket:&lt;ID&gt;</span></p>
+        <p><strong>Beskrivelse:</strong> Stopper sporing for et tog.</p>
+        <p><strong>Eksempel:</strong> <span class="cmd-example">stop rail ticket:2</span></p>
+    </div>
+
+    <div class="cmd-container">
+        <p class="cmd-title">🌦️ Værmelding</p>
+        <p><strong>Syntaks:</strong> <span class="cmd-example">vær [detaljert] [dag]</span></p>
+        <p><strong>Beskrivelse:</strong> Henter værmelding for din posisjon. Vær= i dag, vær i morgen eller Vær i overimorgen Legg til <span class="cmd-example">detaljert</span> for mer info.</p>
+        <p><strong>Eksempel:</strong> <span class="cmd-example">vær i morgen</span></p>
+        <p><strong>Eksempel:</strong> <span class="cmd-example">vær detaljert</span></p>
+    </div>
+
+    <div class="cmd-container">
+        <p class="cmd-title">🚆 Tog avgangstavle</p>
+        <p><strong>Syntaks:</strong> <span class="cmd-example">train &lt;stasjon&gt;</span></p>
+        <p><strong>Beskrivelse:</strong> Henter togavgangene for en stasjon. "Train stationboard" henter nærmeste togstasjons avganger.</p>
+        <p><strong>Eksempel:</strong> <span class="cmd-example">train stationboard Oslo S 5h to:Eidsvoll </span></p>
+    </div>
+
+      <div class="cmd-container">
+        <p class="cmd-title">🚆 Togreise</p>
+        <p><strong>Syntaks:</strong> <span class="cmd-example">train &lt;stasjon&gt;</span></p>
+        <p><strong>Beskrivelse:</strong> Henter reiseforslag mellom to punkter</p>
+        <p><strong>Eksempel:</strong> <span class="cmd-example">train Oslo S-Ustaoset 1h</span></p>
+        <p><strong>Eksempel:</strong> <span class="cmd-example">train Ustaoset (henter togavgang snarest fra Location til ustaoset basert på gps)</span></p>
+        <p><strong>Eksempel:</strong> <span class="cmd-example">train bus Ustaoset-Asker 5h (henter togavgang om 5h fra ustaoset til Asker, og tillater også bussavganger)</span></p>
+        
+    </div>
+
+    <div class="cmd-container">
+        <p class="cmd-title">🏔️ Skredvarsel</p>
+        <p><strong>Syntaks:</strong> <span class="cmd-example">skred</span></p>
+        <p><strong>Beskrivelse:</strong> Henter skredinformasjon basert på din posisjon.</p>
+        <p><strong>Eksempel:</strong> <span class="cmd-example">skred</span></p>
+    </div>
+
+    <div class="cmd-container">
+        <p class="cmd-title">🤖 Generelt spørsmål</p>
+        <p><strong>Syntaks:</strong> <span class="cmd-example">[spørsmål]</span></p>
+        <p><strong>Beskrivelse:</strong> Spør ChatGPT om generelle ting. Den husker også historikken fra de siste 10 minuttene</p>
+        <p><strong>Eksempel:</strong> <span class="cmd-example">Hvor høyt er Galdhøpiggen?</span></p>
+    </div>
+
+    <div class="footer">
+        <p>Disse kommandoene brukes i InReach-meldinger for å få nyttig informasjon basert på posisjon.</p>
+    </div>
+
+</body>
+</html>
